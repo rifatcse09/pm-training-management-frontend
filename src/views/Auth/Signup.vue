@@ -39,45 +39,69 @@
               </h1>
             </div>
             <div>
-            
+
               <form @submit.prevent="handleSubmit">
                 <div class="space-y-5">
-                  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <!-- First Name -->
-                    <div class="sm:col-span-1">
-                      <label
-                        for="fname"
-                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                      >
-                        First Name<span class="text-error-500">*</span>
-                      </label>
-                      <input
-                        v-model="firstName"
-                        type="text"
-                        id="fname"
-                        name="fname"
-                        placeholder="Enter your first name"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                      />
-                    </div>
-                    <!-- Last Name -->
-                    <div class="sm:col-span-1">
-                      <label
-                        for="lname"
-                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                      >
-                        Last Name<span class="text-error-500">*</span>
-                      </label>
-                      <input
-                        v-model="lastName"
-                        type="text"
-                        id="lname"
-                        name="lname"
-                        placeholder="Enter your last name"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                      />
-                    </div>
+
+                  <!-- Full Name -->
+                  <div>
+                    <label for="fullName" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      Full Name<span class="text-error-500">*</span>
+                    </label>
+                    <input
+                      id="fullName"
+                      name="empName"
+                      v-model="empName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
+                    />
                   </div>
+                  <!-- Mobile -->
+                  <div>
+                    <label for="mobile" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      Mobile<span class="text-error-500">*</span>
+                    </label>
+                    <input
+                      id="mobile"
+                      name="mobile"
+                      v-model="mobile"
+                      type="text"
+                      placeholder="Enter your mobile number"
+                      class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
+                    />
+                  </div>
+
+                   <!-- Date of Birth -->
+              <div>
+                <label for="empDob" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Date of Birth<span class="text-error-500">*</span>
+                </label>
+                <flat-pickr
+                  name="empDob"
+                  v-model="empDob"
+                  placeholder="Select date"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
+                />
+              </div>
+
+              <!-- Gender -->
+              <div>
+                <label for="gender" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Gender<span class="text-error-500">*</span>
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  v-model="gender"
+                  class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
+                >
+                  <option value="" disabled>Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
                   <!-- Email -->
                   <div>
                     <label
@@ -149,6 +173,22 @@
                         </svg>
                       </span>
                     </div>
+                  </div>
+                  <!-- Confirm Password -->
+                  <div>
+                    <label
+                      for="password_confirmation"
+                      class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                    >
+                      Confirm Password<span class="text-error-500">*</span>
+                    </label>
+                    <input
+                      v-model="passwordConfirmation"
+                      type="password"
+                      id="password_confirmation"
+                      placeholder="Confirm your password"
+                      class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    />
                   </div>
                   <!-- Checkbox -->
                   <div>
@@ -249,30 +289,48 @@
 </template>
 
 <script setup lang="ts">
+import 'flatpickr/dist/flatpickr.css'
+import flatPickr from 'vue-flatpickr-component'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useRouter } from 'vue-router'
+import api from '@/composables/useApi' // or wherever your axios instance is
 
-const firstName = ref('')
-const lastName = ref('')
+const router = useRouter()
+
+const empName = ref('')
+const mobile = ref('')
 const email = ref('')
 const password = ref('')
-const showPassword = ref(false)
+const passwordConfirmation = ref('')
+const empDob = ref('')
+const gender = ref('')
 const agreeToTerms = ref(false)
 
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value
-}
+const handleSubmit = async () => {
+  if (!agreeToTerms.value) {
+    alert('You must agree to the Terms and Conditions.')
+    return
+  }
 
-const handleSubmit = () => {
-  // Implement form submission logic here
-  console.log('Form submitted', {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    email: email.value,
-    password: password.value,
-    agreeToTerms: agreeToTerms.value,
-  })
+  try {
+    const response = await api.post('/register', {
+      emp_name: empName.value,
+      mobile: mobile.value,
+      email: email.value,
+      password: password.value,
+      password_confirmation: passwordConfirmation.value,
+      emp_dob: empDob.value,
+      gender: gender.value,
+    })
+
+    // If successful, redirect or notify
+    alert('Registration successful!')
+    router.push('/signin')
+  } catch (error: any) {
+    console.error('Registration failed:', error.response?.data || error.message)
+    alert('Registration failed: ' + (error.response?.data?.message || 'Unknown error'))
+  }
 }
 </script>
