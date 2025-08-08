@@ -8,7 +8,7 @@
         <img src="/images/user/avater.png" alt="User" />
       </span>
 
-      <span class="block mr-1 font-medium text-theme-sm">{{ authStore.user?.emp_name || 'User' }} </span>
+      <span class="block mr-1 font-medium text-theme-sm">{{ authStore.user?.name || 'User' }} </span>
 
       <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
     </button>
@@ -72,8 +72,8 @@ const dropdownRef = ref(null)
 
 const menuItems = [
   { href: '/profile', icon: UserCircleIcon, text: 'Edit profile' },
-  { href: '/chat', icon: SettingsIcon, text: 'Account settings' },
-  { href: '/profile', icon: InfoCircleIcon, text: 'Support' },
+  //{ href: '/chat', icon: SettingsIcon, text: 'Account settings' },
+ // { href: '/profile', icon: InfoCircleIcon, text: 'Support' },
 ]
 
 const toggleDropdown = () => {
@@ -93,7 +93,7 @@ const signOut = async () => {
 
     // Redirect to login
     closeDropdown();
-    router.push('/signin')
+    router.push('/')
 
   } catch (error) {
     console.error('Logout API failed:', error.response?.data || error.message)

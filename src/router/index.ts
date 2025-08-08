@@ -128,7 +128,7 @@ const router = createRouter({
     },
 
     {
-      path: '/signin',
+      path: '/',
       name: 'Signin',
       component: () => import('../views/Auth/Signin.vue'),
       meta: {
@@ -151,7 +151,7 @@ router.beforeEach((to, from, next) => {
   const isLoggedIn = !!authStore.token
 
   if (to.meta.requiresAuth && !isLoggedIn) {
-    next('/signin')
+    next('/')
   } else {
     next()
   }

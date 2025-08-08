@@ -50,8 +50,8 @@
                     </label>
                     <input
                       id="fullName"
-                      name="empName"
-                      v-model="empName"
+                      name="name"
+                      v-model="name"
                       type="text"
                       placeholder="Enter your full name"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
@@ -72,36 +72,6 @@
                     />
                   </div>
 
-                   <!-- Date of Birth -->
-              <div>
-                <label for="empDob" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Date of Birth<span class="text-error-500">*</span>
-                </label>
-                <flat-pickr
-                  name="empDob"
-                  v-model="empDob"
-                  placeholder="Select date"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
-                />
-              </div>
-
-              <!-- Gender -->
-              <div>
-                <label for="gender" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Gender<span class="text-error-500">*</span>
-                </label>
-                <select
-                  id="gender"
-                  name="gender"
-                  v-model="gender"
-                  class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
-                >
-                  <option value="" disabled>Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
                   <!-- Email -->
                   <div>
                     <label
@@ -118,6 +88,22 @@
                       placeholder="Enter your email"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
+                  </div>
+                  <!-- Designation -->
+                  <div>
+                    <label for="designation" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      Designation<span class="text-error-500">*</span>
+                    </label>
+                    <select
+                      id="designation"
+                      v-model="selectedDesignation"
+                      class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
+                    >
+                      <option value="" disabled>Select your designation</option>
+                      <option v-for="designation in designations" :key="designation.id" :value="designation.id">
+                        {{ designation.name }}
+                      </option>
+                    </select>
                   </div>
                   <!-- Password -->
                   <div>
@@ -293,20 +279,30 @@ import 'flatpickr/dist/flatpickr.css'
 import flatPickr from 'vue-flatpickr-component'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/composables/useApi' // or wherever your axios instance is
 
 const router = useRouter()
 
-const empName = ref('')
+const name = ref('')
 const mobile = ref('')
 const email = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
-const empDob = ref('')
-const gender = ref('')
 const agreeToTerms = ref(false)
+const designations = ref([])
+const selectedDesignation = ref('')
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/designations')
+    designations.value = response.data
+  } catch (error: any) {
+    console.error('Failed to fetch designations:', error.response?.data || error.message)
+    alert('Failed to load designations.')
+  }
+})
 
 const handleSubmit = async () => {
   if (!agreeToTerms.value) {
@@ -316,18 +312,17 @@ const handleSubmit = async () => {
 
   try {
     const response = await api.post('/register', {
-      emp_name: empName.value,
+      name: name.value,
       mobile: mobile.value,
       email: email.value,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
-      emp_dob: empDob.value,
-      gender: gender.value,
+      designation_id: selectedDesignation.value,
     })
 
     // If successful, redirect or notify
     alert('Registration successful!')
-    router.push('/signin')
+    router.push('/')
   } catch (error: any) {
     console.error('Registration failed:', error.response?.data || error.message)
     alert('Registration failed: ' + (error.response?.data?.message || 'Unknown error'))

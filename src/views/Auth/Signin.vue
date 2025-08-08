@@ -18,6 +18,9 @@
                 </p>
               </div>
               <div>
+                <div v-if="errorMessage" class="text-sm text-error-500 mb-4">
+                  {{ errorMessage }}
+                </div>
                 <form @submit.prevent="handleSubmit">
                   <div class="space-y-5">
                     <!-- Email -->
@@ -196,6 +199,7 @@ import api from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
+import { extractData } from '@/utils/apiResponseHandler' // Import utility function
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -204,41 +208,38 @@ const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const keepLoggedIn = ref(false)
+const errorMessage = ref('') // Reactive variable for error messages
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-// const handleSubmit = () => {
-//   // Handle form submission
-//   console.log('Form submitted', {
-//     email: email.value,
-//     password: password.value,
-//     keepLoggedIn: keepLoggedIn.value,
-//   })
-// }
-
 // Submit login form
 const handleSubmit = async () => {
+  errorMessage.value = '' // Clear previous error message
   try {
     const response = await api.post('/login', {
       email: email.value,
       password: password.value,
     })
 
-    const { access_token, user } = response.data
+    const { access_token, user } = extractData(response) // Use utility function to extract data
 
-    authStore.setAuthData({ access_token, user })
+    if (access_token && user) {
+      authStore.setAuthData({ access_token, user })
 
-    // Optional: remember user (localStorage or cookie)
-    if (keepLoggedIn.value) {
-      localStorage.setItem('authToken', access_token)
+      // Optional: remember user (localStorage or cookie)
+      if (keepLoggedIn.value) {
+        localStorage.setItem('authToken', access_token)
+      }
+
+      router.push('/dashboard') // Redirect to dashboard
+    } else {
+      throw new Error('Invalid login response')
     }
-
-    router.push('/dashboard')
   } catch (error: any) {
     console.error('Login failed:', error.response?.data || error.message)
-    alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'))
+    errorMessage.value = error.response?.data?.error || 'Unknown error' // Display API error message
   }
 }
 </script>
