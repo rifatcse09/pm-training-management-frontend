@@ -21,6 +21,7 @@ app.use(pinia)
 
 const authStore = useAuthStore()
 setupApiInterceptors(authStore)
+authStore.fetchUser() // This will only fetch if user data is missing
 
 app.use(router)
 app.use(VueApexCharts)

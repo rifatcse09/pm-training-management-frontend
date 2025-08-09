@@ -226,11 +226,10 @@ const handleSubmit = async () => {
     const { access_token, user } = extractData(response) // Use utility function to extract data
 
     if (access_token && user) {
-      authStore.setAuthData({ access_token, user })
+      authStore.setAuthData({ access_token, user }) // Set token and user data directly
 
-      // Optional: remember user (localStorage or cookie)
       if (keepLoggedIn.value) {
-        localStorage.setItem('authToken', access_token)
+        localStorage.setItem('authToken', access_token) // Optional: persist token
       }
 
       router.push('/dashboard') // Redirect to dashboard

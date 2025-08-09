@@ -101,7 +101,7 @@ const signOut = async () => {
     // Force client logout anyway
     authStore.logout()
     closeDropdown()
-    router.push('/signin')
+    router.push('/')
   }
 }
 // const signOut = () => {

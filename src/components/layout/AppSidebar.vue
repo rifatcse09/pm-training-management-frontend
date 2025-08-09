@@ -281,7 +281,7 @@ const menuGroups = [
     ],
   },
   {
-    title: "Others",
+    title: "Settings",
     items: [
       {
         icon: PieChartIcon,
@@ -311,7 +311,14 @@ const menuGroups = [
           { name: "Signup", path: "/signup", pro: false },
         ],
       },
-      // ... Add other menu items here
+      {
+        icon: UserCircleIcon,
+        name: "User Management",
+        subItems: [
+          { name: "Pending User List", path: "/user-management/pending-users", pro: false },
+          { name: "Active User List", path: "/user-management/active-users", pro: false },
+        ],
+      },
     ],
   },
 ];

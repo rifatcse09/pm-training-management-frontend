@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import ActiveUserList from "@/views/UserManagement/ActiveUserList.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,8 +14,7 @@ const router = createRouter({
       component: () => import('../views/Ecommerce.vue'),
       meta: {
         title: 'eCommerce Dashboard',
-        requiresAuth: true
-
+        requiresAuth: true,
       },
     },
     {
@@ -23,6 +23,7 @@ const router = createRouter({
       component: () => import('../views/Others/Calendar.vue'),
       meta: {
         title: 'Calendar',
+        requiresAuth: true,
       },
     },
     {
@@ -31,6 +32,7 @@ const router = createRouter({
       component: () => import('../views/Others/UserProfile.vue'),
       meta: {
         title: 'Profile',
+        requiresAuth: true,
       },
     },
     {
@@ -39,6 +41,7 @@ const router = createRouter({
       component: () => import('../views/Forms/FormElements.vue'),
       meta: {
         title: 'Form Elements',
+        requiresAuth: true,
       },
     },
     {
@@ -47,17 +50,26 @@ const router = createRouter({
       component: () => import('../views/Tables/BasicTables.vue'),
       meta: {
         title: 'Basic Tables',
+        requiresAuth: true,
       },
     },
     {
       path: '/line-chart',
       name: 'Line Chart',
       component: () => import('../views/Chart/LineChart/LineChart.vue'),
+      meta: {
+        title: 'Line Chart',
+        requiresAuth: true,
+      },
     },
     {
       path: '/bar-chart',
       name: 'Bar Chart',
       component: () => import('../views/Chart/BarChart/BarChart.vue'),
+      meta: {
+        title: 'Bar Chart',
+        requiresAuth: true,
+      },
     },
     {
       path: '/alerts',
@@ -65,6 +77,7 @@ const router = createRouter({
       component: () => import('../views/UiElements/Alerts.vue'),
       meta: {
         title: 'Alerts',
+        requiresAuth: true,
       },
     },
     {
@@ -73,6 +86,7 @@ const router = createRouter({
       component: () => import('../views/UiElements/Avatars.vue'),
       meta: {
         title: 'Avatars',
+        requiresAuth: true,
       },
     },
     {
@@ -81,6 +95,7 @@ const router = createRouter({
       component: () => import('../views/UiElements/Badges.vue'),
       meta: {
         title: 'Badge',
+        requiresAuth: true,
       },
     },
 
@@ -90,6 +105,7 @@ const router = createRouter({
       component: () => import('../views/UiElements/Buttons.vue'),
       meta: {
         title: 'Buttons',
+        requiresAuth: true,
       },
     },
 
@@ -99,6 +115,7 @@ const router = createRouter({
       component: () => import('../views/UiElements/Images.vue'),
       meta: {
         title: 'Images',
+        requiresAuth: true,
       },
     },
     {
@@ -107,6 +124,7 @@ const router = createRouter({
       component: () => import('../views/UiElements/Videos.vue'),
       meta: {
         title: 'Videos',
+        requiresAuth: true,
       },
     },
     {
@@ -115,6 +133,7 @@ const router = createRouter({
       component: () => import('../views/Pages/BlankPage.vue'),
       meta: {
         title: 'Blank',
+        requiresAuth: true,
       },
     },
 
@@ -143,6 +162,23 @@ const router = createRouter({
         title: 'Signup',
       },
     },
+    {
+      path: '/user-management/pending-users',
+      name: 'Pending User List',
+      component: () => import('../views/UserManagement/PendingUserList.vue'),
+      meta: {
+        title: 'Pending User List',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/user-management/active-users',
+      name: 'ActiveUserList',
+      component: ActiveUserList,
+      meta: {
+        requiresAuth: true,
+      },
+    },
   ],
 })
 
@@ -157,9 +193,9 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-export default router
-
 router.beforeEach((to, from, next) => {
   document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
   next()
 })
+
+export default router
