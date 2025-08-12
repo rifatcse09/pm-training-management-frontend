@@ -179,6 +179,24 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/employee-management/list',
+      name: 'List Employees',
+      component: () => import('../views/Employee/List.vue'),
+      meta: {
+        title: 'Employee List',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/employee-management/add',
+      name: 'Add Employee',
+      component: () => import('../views/Employee/Add.vue'),
+      meta: {
+        title: 'Add Employee',
+        requiresAuth: true,
+      },
+    },
   ],
 })
 

@@ -319,6 +319,14 @@ const menuGroups = [
           { name: "Active User List", path: "/user-management/active-users", pro: false },
         ],
       },
+      {
+        icon: UserCircleIcon,
+        name: "Employee Management",
+        subItems: [
+          { name: "List Employees", path: "/employee-management/list", pro: false },
+          { name: "Add Employee", path: "/employee-management/add", pro: false },
+        ],
+      },
     ],
   },
 ];
