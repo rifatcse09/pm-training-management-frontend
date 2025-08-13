@@ -104,14 +104,13 @@ const employee = ref({
 
 const designations = ref([]);
 const workingPlaces = ref([
-  { id: 1, name: "Place 1" },
-  { id: 2, name: "Place 2" },
-  { id: 3, name: "Place 3" },
-  { id: 4, name: "Place 4" },
-  { id: 5, name: "Place 5" },
-  { id: 6, name: "Place 6" },
-  { id: 7, name: "Place 7" },
-  { id: 8, name: "Place 8" },
+  { id: 1, name: "পরিকল্পনা বিভাগ" },
+  { id: 2, name: "কার্যক্রম বিভাগ" },
+  { id: 3, name: "কৃষি,পানি সম্পদ ও পল্লী প্রতিষ্ঠান বিভাগ" },
+  { id: 4, name: "ভৌত অবকাঠামো বিভাগ" },
+  { id: 5, name: "শিল্প ও শক্তি বিভাগ" },
+  { id: 6, name: "আর্থ-সামাজিক অবকাঠামো বিভাগ" },
+  { id: 7, name: "সাধারণ অর্থনীতি বিভাগ" },
 ]);
 
 onMounted(async () => {
