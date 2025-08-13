@@ -1,44 +1,31 @@
 <template>
-  <div class="mt-4 flex justify-between items-center">
-    <button
-      class="px-4 py-2 bg-gray-300 text-gray-700 rounded"
-      :disabled="pagination.currentPage === 1"
-      @click="changePage(pagination.currentPage - 1)"
-    >
-      Previous
-    </button>
-    <span class="text-sm text-gray-700">
-      Page {{ pagination.currentPage }} of {{ pagination.lastPage }}
-    </span>
-    <button
-      class="px-4 py-2 bg-gray-300 text-gray-700 rounded"
-      :disabled="pagination.currentPage === pagination.lastPage"
-      @click="changePage(pagination.currentPage + 1)"
-    >
-      Next
-    </button>
-    <div class="flex items-center space-x-2 ml-4">
-      <label for="pageInput" class="text-sm text-gray-700">Go to page:</label>
-      <input
-        id="pageInput"
-        type="number"
-        class="border border-gray-300 rounded px-2 py-1 text-sm"
-        v-model.number="specificPage"
-        min="1"
-        :max="pagination.lastPage"
-      />
+  <div class="flex justify-between items-center mt-4">
+    <div>
+      <p class="text-sm text-gray-600">
+        Showing {{ startItem }} to {{ endItem }} of {{ pagination.total }} entries
+      </p>
+    </div>
+    <div class="flex space-x-2">
       <button
-        class="px-4 py-2 bg-blue-500 text-white rounded"
-        @click="goToSpecificPage"
+        :disabled="pagination.currentPage === 1"
+        @click="changePage(pagination.currentPage - 1)"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
       >
-        Go
+        Previous
+      </button>
+      <button
+        :disabled="pagination.currentPage === pagination.lastPage"
+        @click="changePage(pagination.currentPage + 1)"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+      >
+        Next
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
 
 const props = defineProps({
   pagination: {
@@ -51,13 +38,14 @@ const props = defineProps({
   },
 });
 
-const specificPage = ref(1);
+const startItem = computed(() => {
+  return (props.pagination.currentPage - 1) * props.pagination.perPage + 1;
+});
 
-const goToSpecificPage = () => {
-  if (specificPage.value < 1 || specificPage.value > props.pagination.lastPage) {
-    alert("Invalid page number.");
-    return;
-  }
-  props.changePage(specificPage.value);
-};
+const endItem = computed(() => {
+  return Math.min(
+    props.pagination.currentPage * props.pagination.perPage,
+    props.pagination.total
+  );
+});
 </script>

@@ -68,5 +68,6 @@ export default function usePagination(apiEndpoint, perPage = 10) {
     changePage,
     searchQuery,
     clearSearch,
+    totalItems: () => pagination.value.total, // Expose total items count
   };
 }

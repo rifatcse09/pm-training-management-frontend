@@ -248,10 +248,18 @@ const menuGroups = [
         subItems: [{ name: "Ecommerce", path: "/", pro: false }],
       },
       {
-        icon: CalenderIcon,
-        name: "Calendar",
-        path: "/calendar",
+        icon: UserCircleIcon,
+        name: "Employee Management",
+        subItems: [
+          { name: "List Employees", path: "/employee-management/list", pro: false },
+          { name: "Add Employee", path: "/employee-management/add", pro: false },
+        ],
       },
+      // {
+      //   icon: CalenderIcon,
+      //   name: "Calendar",
+      //   path: "/calendar",
+      // },
       {
         icon: UserCircleIcon,
         name: "User Profile",
@@ -265,19 +273,19 @@ const menuGroups = [
           { name: "Form Elements", path: "/form-elements", pro: false },
         ],
       },
-      {
-        name: "Tables",
-        icon: TableIcon,
-        subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-      },
-      {
-        name: "Pages",
-        icon: PageIcon,
-        subItems: [
-          { name: "Black Page", path: "/blank", pro: false },
-          { name: "404 Page", path: "/error-404", pro: false },
-        ],
-      },
+      // {
+      //   name: "Tables",
+      //   icon: TableIcon,
+      //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+      // },
+      // {
+      //   name: "Pages",
+      //   icon: PageIcon,
+      //   subItems: [
+      //     { name: "Black Page", path: "/blank", pro: false },
+      //     { name: "404 Page", path: "/error-404", pro: false },
+      //   ],
+      // },
     ],
   },
   {
@@ -319,14 +327,7 @@ const menuGroups = [
           { name: "Active User List", path: "/user-management/active-users", pro: false },
         ],
       },
-      {
-        icon: UserCircleIcon,
-        name: "Employee Management",
-        subItems: [
-          { name: "List Employees", path: "/employee-management/list", pro: false },
-          { name: "Add Employee", path: "/employee-management/add", pro: false },
-        ],
-      },
+
     ],
   },
 ];
