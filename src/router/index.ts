@@ -226,6 +226,34 @@ const router = createRouter({
       component: () => import('@/views/Organizer/Edit.vue'),
       props: true,
     },
+    {
+      path: '/training-management/list',
+      name: 'ListTrainings',
+      component: () => import('@/views/Training/List.vue'),
+      meta: {
+        title: 'Training List',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/training-management/add',
+      name: 'AddTraining',
+      component: () => import('@/views/Training/Add.vue'),
+      meta: {
+        title: 'Add Training',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/training-management/edit/:id',
+      name: 'EditTraining',
+      component: () => import('@/views/Training/Edit.vue'),
+      props: true,
+      meta: {
+        title: 'Edit Training',
+        requiresAuth: true,
+      },
+    },
   ],
 })
 

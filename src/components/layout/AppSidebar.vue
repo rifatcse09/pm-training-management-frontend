@@ -230,6 +230,7 @@ import {
   ListIcon,
   PlugInIcon,
   BriefcaseIcon,
+  BookOpenIcon, // Add an icon for Training Management
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
@@ -262,6 +263,14 @@ const menuGroups = [
         subItems: [
           { name: "List Organizers", path: "/organizer-management/list", pro: false },
           { name: "Add Organizer", path: "/organizer-management/add", pro: false },
+        ],
+      },
+      {
+        icon: BookOpenIcon,
+        name: "Training Management",
+        subItems: [
+          { name: "List Trainings", path: "/training-management/list", pro: false },
+          { name: "Add Training", path: "/training-management/add", pro: false },
         ],
       },
     ],
