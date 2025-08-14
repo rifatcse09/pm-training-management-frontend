@@ -229,6 +229,7 @@ import {
   TableIcon,
   ListIcon,
   PlugInIcon,
+  BriefcaseIcon,
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
@@ -255,11 +256,14 @@ const menuGroups = [
           { name: "Add Employee", path: "/employee-management/add", pro: false },
         ],
       },
-      // {
-      //   icon: CalenderIcon,
-      //   name: "Calendar",
-      //   path: "/calendar",
-      // },
+      {
+        icon: BriefcaseIcon,
+        name: "Organizer Management",
+        subItems: [
+          { name: "List Organizers", path: "/organizer-management/list", pro: false },
+          { name: "Add Organizer", path: "/organizer-management/add", pro: false },
+        ],
+      },
       {
         icon: UserCircleIcon,
         name: "User Profile",

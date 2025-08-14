@@ -210,6 +210,16 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: "/organizer-management/add",
+      name: "AddOrganizer",
+      component: () => import("@/views/Organizer/Add.vue"),
+    },
+    {
+      path: "/organizer-management/list",
+      name: "ListOrganizers",
+      component: () => import("@/views/Organizer/List.vue"),
+    },
   ],
 })
 
