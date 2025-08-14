@@ -18,7 +18,7 @@
         </div>
         <div class="mb-4">
           <label for="place" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-            Place<span class="text-error-500">*</span>
+            Place
           </label>
           <input
             id="place"
@@ -26,7 +26,6 @@
             type="text"
             placeholder="Enter organizer place"
             class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
-            required
           />
         </div>
         <div class="mb-4">
@@ -66,7 +65,7 @@ const router = useRouter();
 const currentPageTitle = ref("Add Organizer");
 const organizer = ref({
   name: "",
-  place: "",
+  place: "", // Optional field
   is_project: "",
 });
 

@@ -220,6 +220,12 @@ const router = createRouter({
       name: "ListOrganizers",
       component: () => import("@/views/Organizer/List.vue"),
     },
+    {
+      path: '/organizer-management/edit/:id',
+      name: 'EditOrganizer',
+      component: () => import('@/views/Organizer/Edit.vue'),
+      props: true,
+    },
   ],
 })
 
