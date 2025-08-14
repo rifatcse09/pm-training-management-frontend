@@ -54,7 +54,7 @@
             v-model="employee.email"
             type="email"
             placeholder="Enter employee email"
-            class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
+            class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent px-4 px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3"
             required
           />
         </div>
@@ -91,6 +91,7 @@ import { useRouter } from "vue-router";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import api from "@/composables/useApi";
+import { extractData } from "@/utils/apiResponseHandler"; // Ensure this is imported
 
 const router = useRouter();
 const currentPageTitle = ref("Add Employee");
@@ -116,9 +117,10 @@ const workingPlaces = ref([
 onMounted(async () => {
   try {
     const response = await api.get("/designations");
-    designations.value = response.data;
+    designations.value = extractData(response); // Ensure extractData is used correctly
+    console.log("Designations:", designations.value); // Debugging log
   } catch (error) {
-    console.error("Failed to fetch designations:", error);
+    console.error("Failed to fetch designations:", error.response?.data || error.message);
     alert("Failed to load designations.");
   }
 });
