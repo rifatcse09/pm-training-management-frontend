@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import ActiveUserList from "@/views/UserManagement/ActiveUserList.vue";
+import List from "@/views/Employee/List.vue";
+import Add from "@/views/Employee/Add.vue";
+import Edit from "@/views/Employee/Edit.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -182,7 +185,7 @@ const router = createRouter({
     {
       path: '/employee-management/list',
       name: 'List Employees',
-      component: () => import('../views/Employee/List.vue'),
+      component: List,
       meta: {
         title: 'Employee List',
         requiresAuth: true,
@@ -191,9 +194,19 @@ const router = createRouter({
     {
       path: '/employee-management/add',
       name: 'Add Employee',
-      component: () => import('../views/Employee/Add.vue'),
+      component: Add,
       meta: {
         title: 'Add Employee',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/employee-management/edit/:id',
+      name: 'Edit Employee',
+      component: Edit,
+      props: true,
+      meta: {
+        title: 'Edit Employee',
         requiresAuth: true,
       },
     },

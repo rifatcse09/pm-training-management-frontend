@@ -51,12 +51,18 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.name || "N/A" }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.email || "N/A" }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.mobile || "N/A" }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation || "N/A" }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation_name || "N/A" }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.grade || "N/A" }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                  <router-link
+                    :to="`/employee-management/edit/${employee.id}`"
+                    class="text-blue-600 hover:text-blue-900"
+                  >
+                    Edit
+                  </router-link>
                   <button
-                    class="text-indigo-600 hover:text-indigo-900"
-                    @click="deleteEmployee(employee.id)"
+                    class="text-red-600 hover:text-red-900"
+                    @click="confirmDelete(employee.id)"
                   >
                     Delete
                   </button>
@@ -86,7 +92,7 @@ const columns = ref([
   { field: "name", label: "Name" },
   { field: "email", label: "Email" },
   { field: "mobile", label: "Mobile" },
-  { field: "designation", label: "Designation" },
+  { field: "designation_name", label: "Designation" },
   { field: "grade", label: "Grade" },
 ]);
 
@@ -120,10 +126,16 @@ const clearSearch = () => {
   fetchEmployees(1); // Reset to default state
 };
 
+const confirmDelete = (id) => {
+  if (confirm("Are you sure you want to delete this employee?")) {
+    deleteEmployee(id);
+  }
+};
+
 const deleteEmployee = async (id) => {
   try {
     await api.delete(`/employees/${id}`);
-    fetchEmployees(pagination.currentPage);
+    fetchEmployees(pagination.currentPage); // Refresh the list after deletion
   } catch (error) {
     console.error("Error deleting employee:", error.response?.data || error.message);
   }
