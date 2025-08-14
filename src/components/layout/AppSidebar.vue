@@ -264,19 +264,19 @@ const menuGroups = [
           { name: "Add Organizer", path: "/organizer-management/add", pro: false },
         ],
       },
-      {
-        icon: UserCircleIcon,
-        name: "User Profile",
-        path: "/profile",
-      },
+      // {
+      //   icon: UserCircleIcon,
+      //   name: "User Profile",
+      //   path: "/profile",
+      // },
 
-      {
-        name: "Forms",
-        icon: ListIcon,
-        subItems: [
-          { name: "Form Elements", path: "/form-elements", pro: false },
-        ],
-      },
+      // {
+      //   name: "Forms",
+      //   icon: ListIcon,
+      //   subItems: [
+      //     { name: "Form Elements", path: "/form-elements", pro: false },
+      //   ],
+      // },
       // {
       //   name: "Tables",
       //   icon: TableIcon,
