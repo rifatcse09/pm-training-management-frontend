@@ -1,73 +1,52 @@
-import { ref, watch } from "vue";
-import debounce from "lodash.debounce"; // Ensure lodash.debounce is installed
+import { ref } from "vue";
 
-export default function usePagination(apiEndpoint, perPage = 10) {
+export default function usePagination(apiCall) {
   const items = ref([]);
   const pagination = ref({
     currentPage: 1,
-    lastPage: 1,
-    perPage,
-    total: 0,
+    totalPages: 1,
+    totalItems: 0,
+    perPage: 10,
   });
-  const isLoading = ref(false);
-  const searchQuery = ref("");
-  const debouncedFetch = debounce((query) => fetchItems(1, query), 300);
 
   const fetchItems = async (page = 1, searchQuery = "") => {
-    isLoading.value = true;
     try {
-      const response = await apiEndpoint({
+      console.log("Fetching items with page:", page, "and search query:", searchQuery);
+      const response = await apiCall({
         params: {
           page,
-          per_page: pagination.value.perPage,
-          search: searchQuery, // Pass the search query to the API
+          search: searchQuery,
         },
       });
-      const responseData = response.data?.data || response.data; // Adjust if `data` is nested
-      const responseMeta = response.data?.meta || {}; // Adjust if `meta` is nested
+      console.log("API response:", response.data);
 
-      if (Array.isArray(responseData)) {
-        items.value = responseData;
-        pagination.value.currentPage = responseMeta.current_page || page;
-        pagination.value.lastPage = responseMeta.last_page || 1;
-        pagination.value.total = responseMeta.total || responseData.length;
-      } else {
-        console.error("Unexpected API response structure:", response);
-      }
+      items.value = response.data.data || [];
+      pagination.value = {
+        currentPage: response.data.current_page || 1,
+        totalPages: response.data.last_page || 1,
+        totalItems: response.data.total || 0,
+        perPage: response.data.per_page || 10,
+      };
     } catch (error) {
       console.error("Error fetching items:", error.response?.data || error.message);
-    } finally {
-      isLoading.value = false;
+      items.value = []; // Reset items on error
+      pagination.value = {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        perPage: 10,
+      };
     }
   };
 
-  const changePage = (page, searchQuery = "") => {
-    if (page < 1 || page > pagination.value.lastPage) {
-      alert("Invalid page number.");
-      return;
-    }
-    fetchItems(page, searchQuery);
+  const changePage = (page) => {
+    fetchItems(page);
   };
-
-  const clearSearch = () => {
-    searchQuery.value = "";
-    fetchItems(1); // Reload data
-  };
-
-  watch(searchQuery, (newQuery) => {
-    if (newQuery) {
-      debouncedFetch(newQuery); // Debounced fetch for typing
-    }
-  });
 
   return {
     items,
     pagination,
-    isLoading,
     fetchItems,
     changePage,
-    searchQuery,
-    clearSearch,
-    totalItems: () => pagination.value.total, // Expose total items count
   };
 }

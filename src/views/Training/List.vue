@@ -27,6 +27,7 @@
                 <th v-for="column in columns" :key="column.field" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ column.label }}
                 </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -36,6 +37,16 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ formatType(training.type) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(training.start_date) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(training.end_date) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button
+                    v-if="training.file_link"
+                    @click="openFileInNewTab(training.file_link)"
+                    class="text-blue-500 underline"
+                  >
+                    Open
+                  </button>
+                  <span v-else class="text-gray-500">No File</span>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <router-link
                     :to="`/training-management/edit/${training.id}`"
@@ -54,22 +65,7 @@
             </tbody>
           </table>
         </div>
-        <div class="mt-4">
-          <button
-            v-if="meta.current_page > 1"
-            @click="fetchTrainings(meta.current_page - 1)"
-            class="px-4 py-2 bg-gray-300 rounded"
-          >
-            Previous
-          </button>
-          <button
-            v-if="meta.current_page < meta.last_page"
-            @click="fetchTrainings(meta.current_page + 1)"
-            class="px-4 py-2 bg-gray-300 rounded"
-          >
-            Next
-          </button>
-        </div>
+        <Pagination :pagination="pagination" :changePage="fetchTrainings" />
       </ComponentCard>
     </div>
   </AdminLayout>
@@ -81,6 +77,7 @@ import api from '@/composables/useApi'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
+import Pagination from '@/components/common/Pagination.vue'
 
 const currentPageTitle = ref('Training List')
 const columns = ref([
@@ -92,15 +89,32 @@ const columns = ref([
 
 const trainings = ref([])
 const searchQuery = ref('')
-const meta = ref({ current_page: 1, last_page: 1 })
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  per_page: 10,
+})
 
 const fetchTrainings = async (page = 1) => {
   try {
     const response = await api.get('/trainings', { params: { search: searchQuery.value, page } })
-    trainings.value = response.data.data
-    meta.value = response.data.meta
+    trainings.value = response.data.data || []
+    pagination.value = response.data.meta || {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 10,
+    }
   } catch (error) {
     console.error('Failed to fetch trainings:', error.response?.data || error.message)
+    trainings.value = []
+    pagination.value = {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 10,
+    }
   }
 }
 
@@ -108,11 +122,15 @@ const confirmDelete = async (id) => {
   if (confirm('Are you sure you want to delete this training?')) {
     try {
       await api.delete(`/trainings/${id}`)
-      fetchTrainings(meta.value.current_page)
+      fetchTrainings(pagination.value.current_page)
     } catch (error) {
       console.error('Failed to delete training:', error.response?.data || error.message)
     }
   }
+}
+
+const openFileInNewTab = (fileLink) => {
+  window.open(fileLink, '_blank');
 }
 
 // Helper methods for formatting data
