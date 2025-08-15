@@ -101,7 +101,7 @@
                     >
                       <option value="" disabled>Select your designation</option>
                       <option v-for="designation in designations" :key="designation.id" :value="designation.id">
-                        {{ designation.name }}
+                        {{ designation.name+' '+designation.grade}}
                       </option>
                     </select>
                   </div>
@@ -245,7 +245,7 @@
                 >
                   Already have an account?
                   <router-link
-                    to="/signin"
+                    to="/"
                     class="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                     >Sign In</router-link
                   >
@@ -297,7 +297,7 @@ const selectedDesignation = ref('')
 onMounted(async () => {
   try {
     const response = await api.get('/designations')
-    designations.value = response.data
+    designations.value = response.data.data
   } catch (error: any) {
     console.error('Failed to fetch designations:', error.response?.data || error.message)
     alert('Failed to load designations.')

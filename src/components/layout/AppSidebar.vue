@@ -298,14 +298,14 @@ const menuGroups = [
           { name: "Videos", path: "/videos", pro: false },
         ],
       },
-      {
-        icon: PlugInIcon,
-        name: "Authentication",
-        subItems: [
-          { name: "Signin", path: "/signin", pro: false },
-          { name: "Signup", path: "/signup", pro: false },
-        ],
-      },
+      // {
+      //   icon: PlugInIcon,
+      //   name: "Authentication",
+      //   subItems: [
+      //     { name: "Signin", path: "/", pro: false },
+      //     { name: "Signup", path: "/signup", pro: false },
+      //   ],
+      // },
       {
         icon: UserCircleIcon,
         name: "User Management",
