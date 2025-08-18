@@ -7,29 +7,11 @@
           <!-- Training Selection -->
           <div>
             <label for="training" class="block text-sm font-medium text-gray-700 mb-2">Select Training</label>
-            <div class="relative">
-              <input
-                type="text"
-                v-model="trainingSearchQuery"
-                @input="filterTrainings"
-                placeholder="Search and select training..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-              <ul
-                v-if="trainingSearchQuery.length > 0 && filteredTrainings.length > 0"
-                class="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-              >
-                <li
-                  v-for="training in filteredTrainings"
-                  :key="training.id"
-                  @click="selectTraining(training)"
-                  class="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                >
-                  {{ training.name }}
-                </li>
-              </ul>
-            </div>
-            <p v-if="selectedTraining" class="mt-2 text-sm text-gray-600">Selected: {{ selectedTraining.name }}</p>
+            <SingleSelect
+              :options="filteredTrainings"
+              v-model="selectedTraining"
+              placeholder="Search and select training..."
+            />
           </div>
 
           <!-- Employee Selection -->
@@ -65,6 +47,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
+import SingleSelect from '@/components/forms/FormElements/SingleSelect.vue'
 
 const router = useRouter()
 
@@ -83,7 +66,10 @@ const fetchTrainings = async () => {
   try {
     const response = await api.get('/trainings')
     trainings.value = response.data.data || []
-    filteredTrainings.value = trainings.value
+    filteredTrainings.value = trainings.value.map(training => ({
+      value: training.id,
+      label: training.name,
+    }))
   } catch (error) {
     console.error('Failed to fetch trainings:', error.response?.data || error.message)
   }
@@ -108,8 +94,11 @@ const fetchEmployees = async () => {
 
 // Filter training list based on search query
 const filterTrainings = () => {
-  filteredTrainings.value = trainings.value.filter(training =>
-    training.name.toLowerCase().includes(trainingSearchQuery.value.toLowerCase())
+  filteredTrainings.value = trainings.value.map(training => ({
+    value: training.id,
+    label: training.name,
+  })).filter(training =>
+    training.label.toLowerCase().includes(trainingSearchQuery.value.toLowerCase())
   )
 }
 
@@ -118,13 +107,6 @@ const filterEmployees = () => {
   filteredEmployees.value = employees.value.filter(employee =>
     employee.label.toLowerCase().includes(employeeSearchQuery.value.toLowerCase())
   )
-}
-
-// Select training
-const selectTraining = (training) => {
-  selectedTraining.value = training
-  trainingSearchQuery.value = training.name
-  filteredTrainings.value = []
 }
 
 // Assign employees to training
@@ -139,7 +121,7 @@ const assignEmployees = async () => {
   }
   try {
     await api.post('/trainings/assign', {
-      training_id: selectedTraining.value.id,
+      training_id: selectedTraining.value.value,
       employee_ids: selectedEmployees.value.map(e => e.value),
     })
     alert('Employees assigned successfully!')
