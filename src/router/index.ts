@@ -254,6 +254,12 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/training-management/assign',
+      name: 'AssignEmployees',
+      component: () => import('@/views/Training/Assign.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 
