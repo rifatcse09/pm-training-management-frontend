@@ -49,12 +49,6 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <router-link
-                    :to="`/training-management/assign/${training.id}`"
-                    class="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600"
-                  >
-                    Assign Employees
-                  </router-link>
-                  <router-link
                     :to="`/training-management/edit/${training.id}`"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
                   >
@@ -141,7 +135,7 @@ const openFileInNewTab = (fileLink) => {
 
 // Helper methods for formatting data
 const formatType = (type) => {
-  return type === '1' ? 'Type 1' : 'Type 2'
+  return type === '1' ? 'স্থানীয়' : 'বৈদেশিক'
 }
 
 const formatDate = (date) => {

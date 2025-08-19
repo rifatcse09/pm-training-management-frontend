@@ -78,7 +78,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import debounce from "lodash.debounce";
-import usePagination from "@/composables/usePagination";
 import api from "@/composables/useApi";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
@@ -92,12 +91,44 @@ const columns = ref([
   { field: "is_project", label: "Is Project" },
 ]);
 
-const searchQuery = ref("");
-const { items: organizers, pagination, fetchItems: fetchOrganizers, changePage } = usePagination(api.get.bind(null, "/organizers"));
+const organizers = ref([]);
+const searchQuery = ref('');
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  per_page: 10,
+});
+
+const fetchOrganizers = async (page = 1) => {
+  try {
+    const response = await api.get('/organizers', { params: { search: searchQuery.value, page } });
+    organizers.value = response.data.data || [];
+    pagination.value = response.data.meta || {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 10,
+    };
+  } catch (error) {
+    console.error('Failed to fetch organizers:', error.response?.data || error.message);
+    organizers.value = [];
+    pagination.value = {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 10,
+    };
+  }
+};
+
+const changePage = (page) => {
+  fetchOrganizers(page); // Fetch organizers for the selected page
+};
 
 const debouncedSearch = debounce(() => {
   if (searchQuery.value.trim() !== "") {
-    fetchOrganizers(1, searchQuery.value);
+    fetchOrganizers(1);
   }
 }, 1000);
 
@@ -107,7 +138,7 @@ watch(searchQuery, () => {
 
 const searchOrganizers = () => {
   if (searchQuery.value.trim() !== "") {
-    fetchOrganizers(1, searchQuery.value); // Immediate fetch
+    fetchOrganizers(1); // Immediate fetch
   }
 };
 
@@ -122,18 +153,14 @@ const clearSearch = () => {
   fetchOrganizers(1); // Reset to default state
 };
 
-const confirmDelete = (id) => {
-  if (confirm("Are you sure you want to delete this organizer?")) {
-    deleteOrganizer(id);
-  }
-};
-
-const deleteOrganizer = async (id) => {
-  try {
-    await api.delete(`/organizers/${id}`);
-    fetchOrganizers(pagination.currentPage); // Refresh the list after deletion
-  } catch (error) {
-    console.error("Error deleting organizer:", error.response?.data || error.message);
+const confirmDelete = async (id) => {
+  if (confirm('Are you sure you want to delete this organizer?')) {
+    try {
+      await api.delete(`/organizers/${id}`);
+      fetchOrganizers(pagination.value.current_page);
+    } catch (error) {
+      console.error('Failed to delete organizer:', error.response?.data || error.message);
+    }
   }
 };
 

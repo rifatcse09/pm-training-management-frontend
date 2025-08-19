@@ -260,6 +260,11 @@ const router = createRouter({
       component: () => import('@/views/Training/Assign.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/training-management/assign-list',
+      name: 'AssignList',
+      component: () => import('@/views/Training/AssignList.vue'),
+    },
   ],
 })
 

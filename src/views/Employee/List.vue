@@ -14,8 +14,7 @@
             <input
               type="text"
               v-model="searchQuery"
-              @keyup.enter="searchEmployees"
-              @input="handleSearchInput"
+              @keyup.enter="fetchEmployees"
               placeholder="Search employees..."
               class="border border-gray-300 rounded px-4 py-2 text-sm w-64"
             />
@@ -80,7 +79,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import debounce from "lodash.debounce";
-import usePagination from "@/composables/usePagination";
 import api from "@/composables/useApi";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
@@ -96,12 +94,44 @@ const columns = ref([
   { field: "grade", label: "Grade" },
 ]);
 
-const searchQuery = ref("");
-const { items: employees, pagination, fetchItems: fetchEmployees, changePage } = usePagination(api.get.bind(null, "/employees"));
+const employees = ref([]);
+const searchQuery = ref('');
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  per_page: 10,
+});
+
+const fetchEmployees = async (page = 1) => {
+  try {
+    const response = await api.get('/employees', { params: { search: searchQuery.value, page } });
+    employees.value = response.data.data || [];
+    pagination.value = response.data.meta || {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 10,
+    };
+  } catch (error) {
+    console.error('Failed to fetch employees:', error.response?.data || error.message);
+    employees.value = [];
+    pagination.value = {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 10,
+    };
+  }
+};
+
+const changePage = (page) => {
+  fetchEmployees(page); // Fetch employees for the selected page
+};
 
 const debouncedSearch = debounce(() => {
   if (searchQuery.value.trim() !== "") {
-    fetchEmployees(1, searchQuery.value);
+    fetchEmployees(1);
   }
 }, 1000);
 
@@ -109,35 +139,19 @@ watch(searchQuery, () => {
   debouncedSearch(); // Debounced fetch for typing
 });
 
-const searchEmployees = () => {
-  if (searchQuery.value.trim() !== "") {
-    fetchEmployees(1, searchQuery.value); // Immediate fetch
-  }
-};
-
-const handleSearchInput = () => {
-  if (searchQuery.value.trim() === "") {
-    fetchEmployees(1); // Reset to default state when search box is cleared
-  }
-};
-
 const clearSearch = () => {
   searchQuery.value = ""; // Clear the search box
   fetchEmployees(1); // Reset to default state
 };
 
-const confirmDelete = (id) => {
-  if (confirm("Are you sure you want to delete this employee?")) {
-    deleteEmployee(id);
-  }
-};
-
-const deleteEmployee = async (id) => {
-  try {
-    await api.delete(`/employees/${id}`);
-    fetchEmployees(pagination.currentPage); // Refresh the list after deletion
-  } catch (error) {
-    console.error("Error deleting employee:", error.response?.data || error.message);
+const confirmDelete = async (id) => {
+  if (confirm('Are you sure you want to delete this employee?')) {
+    try {
+      await api.delete(`/employees/${id}`);
+      fetchEmployees(pagination.value.current_page);
+    } catch (error) {
+      console.error('Failed to delete employee:', error.response?.data || error.message);
+    }
   }
 };
 
