@@ -254,7 +254,7 @@
             </div>
           </div>
         </div>
-        <div
+        <!-- <div
           class="relative items-center hidden w-full h-full lg:w-1/2 bg-brand-950 dark:bg-white/5 lg:grid"
         >
           <div class="flex items-center justify-center z-1">
@@ -264,11 +264,11 @@
                 <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
               </router-link>
               <p class="text-center text-gray-400 dark:text-white/60">
-                Free and Open-Source Tailwind CSS Admin Dashboard Template
+                Planning Division
               </p>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </FullScreenLayout>

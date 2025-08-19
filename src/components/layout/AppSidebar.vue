@@ -19,8 +19,8 @@
         !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
       ]"
     >
-      <router-link to="/">
-        <img
+      <router-link to="/" class="flex items-center">
+        <!-- <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="dark:hidden"
           src="/images/logo/logo.svg"
@@ -42,7 +42,13 @@
           alt="Logo"
           width="32"
           height="32"
-        />
+        /> -->
+        <span
+          v-if="isExpanded || isHovered || isMobileOpen"
+          class="ml-2 text-lg font-semibold text-gray-900 dark:text-white"
+        >
+          Planning Division
+        </span>
       </router-link>
     </div>
     <div
@@ -270,7 +276,7 @@ const menuGroups = [
         name: "Training Management",
         subItems: [
           { name: "List Trainings", path: "/training-management/list", pro: false },
-          { name: "Add Training", path: "/training-management/add", pro: false },
+          // { name: "Add Training", path: "/training-management/add", pro: false },
           { name: "Assign Employees", path: "/training-management/assign", pro: false }, // New menu item
           { name: "Assign List", path: "/training-management/assign-list", pro: false }, // New menu item
         ],
@@ -280,26 +286,26 @@ const menuGroups = [
   {
     title: "Settings",
     items: [
-      {
-        icon: PieChartIcon,
-        name: "Charts",
-        subItems: [
-          { name: "Line Chart", path: "/line-chart", pro: false },
-          { name: "Bar Chart", path: "/bar-chart", pro: false },
-        ],
-      },
-      {
-        icon: BoxCubeIcon,
-        name: "Ui Elements",
-        subItems: [
-          { name: "Alerts", path: "/alerts", pro: false },
-          { name: "Avatars", path: "/avatars", pro: false },
-          { name: "Badge", path: "/badge", pro: false },
-          { name: "Buttons", path: "/buttons", pro: false },
-          { name: "Images", path: "/images", pro: false },
-          { name: "Videos", path: "/videos", pro: false },
-        ],
-      },
+      // {
+      //   icon: PieChartIcon,
+      //   name: "Charts",
+      //   subItems: [
+      //     { name: "Line Chart", path: "/line-chart", pro: false },
+      //     { name: "Bar Chart", path: "/bar-chart", pro: false },
+      //   ],
+      // },
+      // {
+      //   icon: BoxCubeIcon,
+      //   name: "Ui Elements",
+      //   subItems: [
+      //     { name: "Alerts", path: "/alerts", pro: false },
+      //     { name: "Avatars", path: "/avatars", pro: false },
+      //     { name: "Badge", path: "/badge", pro: false },
+      //     { name: "Buttons", path: "/buttons", pro: false },
+      //     { name: "Images", path: "/images", pro: false },
+      //     { name: "Videos", path: "/videos", pro: false },
+      //   ],
+      // },
       // {
       //   icon: PlugInIcon,
       //   name: "Authentication",
