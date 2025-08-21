@@ -43,18 +43,17 @@
                 <p v-if="errors.countries" class="text-red-500 text-sm mt-1">{{ errors.countries[0] }}</p>
               </div>
               <div>
-                <label for="organization_id" class="block text-sm font-medium text-gray-700 text-left">Organization</label>
-                <select
-                  id="organization_id"
+                <label for="organization_id" class="block text-sm font-medium text-gray-700 mb-2">Select Organization</label>
+                <CustomDropdown
+                  :options="filteredOrganizations"
                   v-model="training.organization_id"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  required
-                >
-                  <option value="" disabled>Select Organization</option>
-                  <option v-for="org in organizations" :key="org.id" :value="org.id">
-                    {{ org.name }}
-                  </option>
-                </select>
+                  :reduce="org => org.id"
+                  :fetchMore="loadMoreOrganizations"
+                  :loading="loading"
+                  @search="handleOrganizationSearch"
+                  placeholder="Search and select organization..."
+                />
+                <p v-if="errors.organization_id" class="text-red-500 text-sm mt-1">{{ errors.organization_id[0] }}</p>
               </div>
               <div>
                 <label for="start_date" class="block text-sm font-medium text-gray-700 text-left">Start Date</label>
@@ -106,8 +105,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import debounce from "lodash.debounce";
 import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
 import FileInput from "@/components/forms/FormElements/FileInput.vue";
@@ -117,6 +117,7 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
+import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -134,8 +135,23 @@ const training = ref({
 
 const selectedCountries = ref([]);
 const organizations = ref([]);
+const filteredOrganizations = computed(() => {
+  return organizations.value.map((org) => ({
+    id: org.id,
+    label: org.name,
+  }));
+});
 const countries = ref([]);
 const errors = ref({});
+const searchQuery = ref("");
+const loading = ref(false);
+
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+});
 
 const flatpickrConfig = {
   dateFormat: "Y-m-d",
@@ -159,6 +175,14 @@ const fetchTraining = async () => {
       countries: data.countries || [],
     };
 
+    // Ensure the selected organization is in the dropdown options
+    if (!organizations.value.find((org) => org.id === training.value.organization_id)) {
+      organizations.value.push({
+        id: training.value.organization_id,
+        name: data.organization_name || "Unknown Organization",
+      });
+    }
+
     // Set selectedCountries to an array of country IDs if type is 2
     if (training.value.type === "2") {
       selectedCountries.value = training.value.countries.map((country) => ({
@@ -173,12 +197,45 @@ const fetchTraining = async () => {
   }
 };
 
-const fetchOrganizations = async () => {
+const fetchOrganizations = async (query = "", page = 1) => {
+  if (loading.value) return;
+  loading.value = true;
+
   try {
-    const response = await api.get("/organizers");
-    organizations.value = response.data.data;
+    const response = await api.get("/organizers", { params: { search: query, page } });
+    const data = response.data;
+
+    if (page === 1) {
+      organizations.value = data.data || [];
+    } else {
+      organizations.value = [...organizations.value, ...(data.data || [])];
+    }
+
+    pagination.value = data.meta || {
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+      total: 0,
+    };
   } catch (error) {
     console.error("Failed to fetch organizations:", error.response?.data || error.message);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const debouncedFetchOrganizations = debounce((query) => {
+  fetchOrganizations(query, 1);
+}, 500);
+
+const handleOrganizationSearch = (query) => {
+  searchQuery.value = query;
+  debouncedFetchOrganizations(query);
+};
+
+const loadMoreOrganizations = () => {
+  if (pagination.value.current_page < pagination.value.last_page) {
+    fetchOrganizations(searchQuery.value, pagination.value.current_page + 1);
   }
 };
 
