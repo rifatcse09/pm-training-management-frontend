@@ -1,139 +1,140 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb :pageTitle="'Assign Employees to Training'" />
-    <div class="space-y-6">
-      <ComponentCard title="Assign Employees">
-        <form @submit.prevent="assignEmployees" class="space-y-6">
-          <!-- Training Selection -->
-          <div>
-            <label for="training" class="block text-sm font-medium text-gray-700 mb-2">Select Training</label>
-            <SingleSelect
-              :options="filteredTrainings"
-              v-model="selectedTraining"
-              placeholder="Search and select training..."
-            />
-          </div>
-
-          <!-- Employee Selection -->
-          <div>
-            <label for="employees" class="block text-sm font-medium text-gray-700 mb-2">Select Employees</label>
-            <MultipleSelect
-              :options="filteredEmployees"
-              v-model="selectedEmployees"
-              placeholder="Search and select employees..."
-            />
-          </div>
-
-          <!-- Submit Button -->
-          <div class="flex justify-end">
-            <button
-              type="submit"
-              class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Assign
-            </button>
-          </div>
-        </form>
-      </ComponentCard>
+    <PageBreadcrumb :pageTitle="currentPageTitle" />
+    <div class="flex justify-start">
+      <div class="w-full max-w-2xl space-y-5 sm:space-y-6">
+        <ComponentCard title="Assign Employees to Training" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+          <form @submit.prevent="assignEmployees" class="text-left">
+            <div class="grid grid-cols-1 gap-6">
+              <div>
+                <label for="training" class="block text-sm font-medium text-gray-700 text-left">Select Training</label>
+                <CustomDropdown
+                  :options="filteredTrainings"
+                  v-model="selectedTraining"
+                  :reduce="training => training.value"
+                  :fetchMore="loadMoreTrainings"
+                  :loading="loading"
+                  @search="handleTrainingSearch"
+                  placeholder="Search and select training..."
+                />
+                <p v-if="errors.training" class="text-red-500 text-sm mt-1">{{ errors.training[0] }}</p>
+              </div>
+              <div>
+                <label for="employees" class="block text-sm font-medium text-gray-700 text-left">Select Employees</label>
+                <MultipleSelect
+                  :options="filteredEmployees"
+                  v-model="selectedEmployees"
+                  placeholder="Search and select employees..."
+                />
+              </div>
+            </div>
+            <div class="mt-6 flex justify-start">
+              <button
+                type="submit"
+                class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 text-left"
+              >
+                Assign
+              </button>
+            </div>
+          </form>
+        </ComponentCard>
+      </div>
     </div>
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '@/composables/useApi'
-import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
-import AdminLayout from '@/components/layout/AdminLayout.vue'
-import ComponentCard from '@/components/common/ComponentCard.vue'
-import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
-import SingleSelect from '@/components/forms/FormElements/SingleSelect.vue'
+import { ref, computed, onMounted } from "vue";
+import debounce from "lodash.debounce";
+import api from "@/composables/useApi";
+import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
+import AdminLayout from "@/components/layout/AdminLayout.vue";
+import ComponentCard from "@/components/common/ComponentCard.vue";
+import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
+import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
 
-const router = useRouter()
+const currentPageTitle = ref("Assign Employees to Training");
+const selectedTraining = ref(null);
+const selectedEmployees = ref([]);
+const trainings = ref([]);
+const employees = ref([]);
+const filteredTrainings = ref([]);
+const filteredEmployees = ref([]);
+const trainingSearchQuery = ref("");
+const loading = ref(false);
+const errors = ref({});
 
-// State variables
-const trainings = ref([])
-const employees = ref([])
-const filteredTrainings = ref([])
-const filteredEmployees = ref([])
-const selectedTraining = ref(null)
-const selectedEmployees = ref([])
-const trainingSearchQuery = ref('')
-const employeeSearchQuery = ref('')
+const fetchTrainings = async (query = "", page = 1) => {
+  if (loading.value) return;
+  loading.value = true;
 
-// Fetch training list
-const fetchTrainings = async () => {
   try {
-    const response = await api.get('/trainings')
-    trainings.value = response.data.data || []
-    filteredTrainings.value = trainings.value.map(training => ({
+    const response = await api.get("/trainings", { params: { search: query, page } });
+    const data = response.data;
+
+    if (page === 1) {
+      trainings.value = data.data || [];
+    } else {
+      trainings.value = [...trainings.value, ...(data.data || [])];
+    }
+
+    filteredTrainings.value = trainings.value.map((training) => ({
       value: training.id,
       label: training.name,
-    }))
+    }));
   } catch (error) {
-    console.error('Failed to fetch trainings:', error.response?.data || error.message)
+    console.error("Failed to fetch trainings:", error.response?.data || error.message);
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-// Fetch employee list
 const fetchEmployees = async () => {
   try {
-    const response = await api.get('/employees')
-    // Ensure employees is an array and map to the correct format for MultipleSelect
-    employees.value = Array.isArray(response.data.data) ? response.data.data.map(employee => ({
+    const response = await api.get("/employees");
+    employees.value = response.data.data.map((employee) => ({
       value: employee.id,
-      label: employee.name || 'Unnamed Employee', // Handle cases where name might be null
-    })) : []
-    filterEmployees() // Update the filtered list after fetching
+      label: employee.name || "Unnamed Employee",
+    }));
+    filteredEmployees.value = employees.value;
   } catch (error) {
-    console.error('Failed to fetch employees:', error.response?.data || error.message)
-    employees.value = [] // Reset employees to an empty array on error
-    filteredEmployees.value = [] // Reset filtered employees
+    console.error("Failed to fetch employees:", error.response?.data || error.message);
   }
-}
+};
 
-// Filter training list based on search query
-const filterTrainings = () => {
-  filteredTrainings.value = trainings.value.map(training => ({
-    value: training.id,
-    label: training.name,
-  })).filter(training =>
-    training.label.toLowerCase().includes(trainingSearchQuery.value.toLowerCase())
-  )
-}
+const handleTrainingSearch = debounce((query) => {
+  trainingSearchQuery.value = query;
+  fetchTrainings(query, 1);
+}, 500);
 
-// Filter employee list based on search query
-const filterEmployees = () => {
-  filteredEmployees.value = employees.value.filter(employee =>
-    employee.label.toLowerCase().includes(employeeSearchQuery.value.toLowerCase())
-  )
-}
+const loadMoreTrainings = () => {
+  fetchTrainings(trainingSearchQuery.value, 2); // Fetch next page
+};
 
-// Assign employees to training
 const assignEmployees = async () => {
   if (!selectedTraining.value) {
-    alert('Please select a training.')
-    return
+    alert("Please select a training.");
+    return;
   }
   if (selectedEmployees.value.length === 0) {
-    alert('Please select at least one employee.')
-    return
+    alert("Please select at least one employee.");
+    return;
   }
-  try {
-    await api.post('/trainings/assign', {
-      training_id: selectedTraining.value.value,
-      employee_ids: selectedEmployees.value.map(e => e.value),
-    })
-    alert('Employees assigned successfully!')
-    router.push('/training-management/list')
-  } catch (error) {
-    console.error('Failed to assign employees:', error.response?.data || error.message)
-  }
-}
 
-// Fetch initial data on mount
+  try {
+    await api.post("/trainings/assign", {
+      training_id: selectedTraining.value,
+      employee_ids: selectedEmployees.value.map((e) => e.value),
+    });
+    alert("Employees assigned successfully!");
+  } catch (error) {
+    console.error("Failed to assign employees:", error.response?.data || error.message);
+    alert("Failed to assign employees. Please try again.");
+  }
+};
+
 onMounted(() => {
-  fetchTrainings()
-  fetchEmployees()
-})
+  fetchTrainings();
+  fetchEmployees();
+});
 </script>

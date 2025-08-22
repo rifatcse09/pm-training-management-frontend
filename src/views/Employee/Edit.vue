@@ -86,11 +86,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useWorkingPlaces } from "@/composables/useWorkingPlaces"; // Import the composable
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import api from "@/composables/useApi";
-import { extractData } from "@/utils/apiResponseHandler";
 
 const route = useRoute();
 const router = useRouter();
@@ -104,33 +104,12 @@ const employee = ref({
 });
 
 const designations = ref([]);
-const workingPlaces = ref([
-  { id: 1, name: "পরিকল্পনা বিভাগ" },
-  { id: 2, name: "কার্যক্রম বিভাগ" },
-  { id: 3, name: "কৃষি,পানি সম্পদ ও পল্লী প্রতিষ্ঠান বিভাগ" },
-  { id: 4, name: "ভৌত অবকাঠামো বিভাগ" },
-  { id: 5, name: "শিল্প ও শক্তি বিভাগ" },
-  { id: 6, name: "আর্থ-সামাজিক অবকাঠামো বিভাগ" },
-  { id: 7, name: "সাধারণ অর্থনীতি বিভাগ" },
-]);
+const { workingPlaces } = useWorkingPlaces(); // Use the composable to get workingPlaces
 
 const fetchEmployee = async () => {
   try {
     const response = await api.get(`/employees/${route.params.id}`);
-    const data = extractData(response);
-
-    employee.value = {
-      name: data.name,
-      designation_id: data.designation_id,
-      mobile: data.mobile,
-      email: data.email,
-      working_place: data.working_place,
-      type: data.type, // Include type to check for foreign employees
-      countries: data.type === 2 ? data.countries.map(country => ({
-        id: country.id,
-        name: country.name,
-      })) : [], // Map countries if type is 2
-    };
+    employee.value = response.data.data || {};
   } catch (error) {
     console.error("Failed to fetch employee:", error.response?.data || error.message);
     alert("Failed to load employee data.");
@@ -148,14 +127,7 @@ const updateEmployee = async () => {
   }
 };
 
-onMounted(async () => {
-  await fetchEmployee();
-  try {
-    const response = await api.get("/designations");
-    designations.value = extractData(response);
-  } catch (error) {
-    console.error("Failed to fetch designations:", error.response?.data || error.message);
-    alert("Failed to load designations.");
-  }
+onMounted(() => {
+  fetchEmployee();
 });
 </script>

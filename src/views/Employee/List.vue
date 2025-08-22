@@ -52,6 +52,9 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.mobile || "N/A" }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation_name || "N/A" }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.grade || "N/A" }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{ getWorkingPlaceName(employee.working_place) }}
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <router-link
                     :to="`/employee-management/edit/${employee.id}`"
@@ -80,6 +83,7 @@
 import { ref, onMounted, watch } from "vue";
 import debounce from "lodash.debounce";
 import api from "@/composables/useApi";
+import { useWorkingPlaces } from "@/composables/useWorkingPlaces"; // Import the composable
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
@@ -92,6 +96,7 @@ const columns = ref([
   { field: "mobile", label: "Mobile" },
   { field: "designation_name", label: "Designation" },
   { field: "grade", label: "Grade" },
+  { field: "working_place", label: "Working Place" }, // Added column for Working Place
 ]);
 
 const employees = ref([]);
@@ -102,6 +107,14 @@ const pagination = ref({
   total: 0,
   per_page: 10,
 });
+
+const { workingPlaces } = useWorkingPlaces(); // Use the composable to get workingPlaces
+
+// Function to get the working place name by ID
+const getWorkingPlaceName = (id) => {
+  const place = workingPlaces.value.find((place) => place.id == id);
+  return place ? place.name : "N/A";
+};
 
 const fetchEmployees = async (page = 1) => {
   try {

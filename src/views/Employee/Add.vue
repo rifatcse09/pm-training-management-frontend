@@ -86,11 +86,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useWorkingPlaces } from "@/composables/useWorkingPlaces"; // Import the composable
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import api from "@/composables/useApi";
-import { extractData } from "@/utils/apiResponseHandler"; // Ensure this is imported
 
 const router = useRouter();
 const currentPageTitle = ref("Add Employee");
@@ -103,21 +103,12 @@ const employee = ref({
 });
 
 const designations = ref([]);
-const workingPlaces = ref([
-  { id: 1, name: "পরিকল্পনা বিভাগ" },
-  { id: 2, name: "কার্যক্রম বিভাগ" },
-  { id: 3, name: "কৃষি,পানি সম্পদ ও পল্লী প্রতিষ্ঠান বিভাগ" },
-  { id: 4, name: "ভৌত অবকাঠামো বিভাগ" },
-  { id: 5, name: "শিল্প ও শক্তি বিভাগ" },
-  { id: 6, name: "আর্থ-সামাজিক অবকাঠামো বিভাগ" },
-  { id: 7, name: "সাধারণ অর্থনীতি বিভাগ" },
-]);
+const { workingPlaces } = useWorkingPlaces(); // Use the composable to get workingPlaces
 
 onMounted(async () => {
   try {
     const response = await api.get("/designations");
-    designations.value = extractData(response); // Ensure extractData is used correctly
-    console.log("Designations:", designations.value); // Debugging log
+    designations.value = response.data.data || [];
   } catch (error) {
     console.error("Failed to fetch designations:", error.response?.data || error.message);
     alert("Failed to load designations.");
@@ -126,8 +117,7 @@ onMounted(async () => {
 
 const addEmployee = async () => {
   try {
-    const response = await api.post("/employees", employee.value);
-    console.log("Employee added successfully:", response.data);
+    await api.post("/employees", employee.value);
     alert("Employee added successfully!");
     router.push("/employee-management/list");
   } catch (error) {
