@@ -1,8 +1,9 @@
 <template>
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
-    <div class="flex justify-start">
-      <div class="w-full max-w-2xl space-y-5 sm:space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left Column: Assign Employees to Training -->
+      <div>
         <ComponentCard title="Assign Employees to Training" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
           <form @submit.prevent="assignEmployees" class="text-left">
             <div class="grid grid-cols-1 gap-6">
@@ -19,24 +20,98 @@
                 />
                 <p v-if="errors.training" class="text-red-500 text-sm mt-1">{{ errors.training[0] }}</p>
               </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label for="workingPlace" class="block text-sm font-medium text-gray-700 text-left">Filter by Working Place</label>
+                  <select
+                    id="workingPlace"
+                    v-model="selectedWorkingPlace"
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                    required
+                  >
+                    <option value="" disabled>Select working place</option>
+                    <option v-for="place in workingPlaces" :key="place.id" :value="place.id">
+                      {{ place.name }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label for="designation" class="block text-sm font-medium text-gray-700 text-left">Filter by Designation</label>
+                  <CustomDropdown
+                    :options="designations"
+                    v-model="selectedDesignation"
+                    :reduce="designation => designation.value"
+                    placeholder="Select designation..."
+                  />
+                </div>
+              </div>
               <div>
                 <label for="employees" class="block text-sm font-medium text-gray-700 text-left">Select Employees</label>
-                <MultipleSelect
-                  :options="filteredEmployees"
-                  v-model="selectedEmployees"
-                  placeholder="Search and select employees..."
-                />
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input type="checkbox" @change="toggleAllEmployees" />
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Working Place</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="employee in filteredEmployees" :key="employee.value">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" v-model="selectedEmployees" :value="employee" @change="addToSelectedTable(employee)" />
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">{{ employee.label }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation + ' ' + employee.grade }}</td>
+                      <td class="px-6 py-4 whitespace-nowrap">{{ getWorkingPlaceName(employee.workingPlace) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div class="mt-6 flex justify-start">
-              <button
-                type="submit"
-                class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 text-left"
-              >
-                Assign
-              </button>
-            </div>
           </form>
+        </ComponentCard>
+      </div>
+
+      <!-- Right Column: Selected Employees -->
+      <div>
+        <ComponentCard title="Selected Employees" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-700">Selected Employees</h3>
+            <button
+              class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              @click="assignSelectedEmployees"
+            >
+              Assign Selected
+            </button>
+          </div>
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Working Place</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="employee in selectedTableEmployees" :key="employee.value">
+                <td class="px-6 py-4 whitespace-nowrap">{{ employee.label }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation + ' ' + employee.grade }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ getWorkingPlaceName(employee.workingPlace) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button
+                    class="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                    @click="removeFromSelectedTable(employee)"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </ComponentCard>
       </div>
     </div>
@@ -44,25 +119,53 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import debounce from "lodash.debounce";
 import api from "@/composables/useApi";
+import { useWorkingPlaces } from "@/composables/useWorkingPlaces";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
-import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
 import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
 
 const currentPageTitle = ref("Assign Employees to Training");
 const selectedTraining = ref(null);
 const selectedEmployees = ref([]);
+const selectedTableEmployees = ref([]); // Store employees in the lower table
 const trainings = ref([]);
 const employees = ref([]);
-const filteredTrainings = ref([]);
 const filteredEmployees = ref([]);
+const designations = ref([]);
+const selectedWorkingPlace = ref("");
+const selectedDesignation = ref(null);
 const trainingSearchQuery = ref("");
 const loading = ref(false);
 const errors = ref({});
+const { workingPlaces } = useWorkingPlaces();
+
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+});
+
+// Function to get the working place name by ID
+const getWorkingPlaceName = (id) => {
+  const place = workingPlaces.value.find((place) => place.id == id);
+  return place ? place.name : "N/A";
+};
+
+const addToSelectedTable = (employee) => {
+  if (!selectedTableEmployees.value.find((e) => e.value === employee.value)) {
+    selectedTableEmployees.value.push(employee);
+    saveEmployeeToAPI(employee);
+  }
+};
+
+const removeFromSelectedTable = (employee) => {
+  selectedTableEmployees.value = selectedTableEmployees.value.filter((e) => e.value !== employee.value);
+};
 
 const fetchTrainings = async (query = "", page = 1) => {
   if (loading.value) return;
@@ -73,15 +176,26 @@ const fetchTrainings = async (query = "", page = 1) => {
     const data = response.data;
 
     if (page === 1) {
-      trainings.value = data.data || [];
+      trainings.value = data.data.map((training) => ({
+        value: training.id,
+        label: training.name,
+      }));
     } else {
-      trainings.value = [...trainings.value, ...(data.data || [])];
+      trainings.value = [
+        ...trainings.value,
+        ...data.data.map((training) => ({
+          value: training.id,
+          label: training.name,
+        })),
+      ];
     }
 
-    filteredTrainings.value = trainings.value.map((training) => ({
-      value: training.id,
-      label: training.name,
-    }));
+    pagination.value = data.meta || {
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+      total: 0,
+    };
   } catch (error) {
     console.error("Failed to fetch trainings:", error.response?.data || error.message);
   } finally {
@@ -89,26 +203,67 @@ const fetchTrainings = async (query = "", page = 1) => {
   }
 };
 
-const fetchEmployees = async () => {
+const debouncedFetchTrainings = debounce((query) => {
+  fetchTrainings(query, 1);
+}, 500);
+
+const handleTrainingSearch = (query) => {
+  trainingSearchQuery.value = query;
+  debouncedFetchTrainings(query);
+};
+
+const loadMoreTrainings = () => {
+  if (pagination.value.current_page < pagination.value.last_page) {
+    fetchTrainings(trainingSearchQuery.value, pagination.value.current_page + 1);
+  }
+};
+
+const filteredTrainings = computed(() => {
+  return trainings.value;
+});
+
+const fetchDesignations = async () => {
   try {
-    const response = await api.get("/employees");
+    const response = await api.get("/designations");
+    designations.value = response.data.data.map((designation) => ({
+      value: designation.id,
+      label: designation.name,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch designations:", error.response?.data || error.message);
+  }
+};
+
+const fetchEmployees = async () => {
+  loading.value = true;
+  try {
+    const response = await api.get("/employees", {
+      params: {
+        working_place: selectedWorkingPlace.value || null,
+        designation_id: selectedDesignation.value || null,
+      },
+    });
     employees.value = response.data.data.map((employee) => ({
       value: employee.id,
       label: employee.name || "Unnamed Employee",
+      designation: employee.designation_name,
+      grade: employee.grade,
+      workingPlace: employee.working_place,
     }));
     filteredEmployees.value = employees.value;
   } catch (error) {
     console.error("Failed to fetch employees:", error.response?.data || error.message);
+  } finally {
+    loading.value = false;
   }
 };
 
-const handleTrainingSearch = debounce((query) => {
-  trainingSearchQuery.value = query;
-  fetchTrainings(query, 1);
-}, 500);
-
-const loadMoreTrainings = () => {
-  fetchTrainings(trainingSearchQuery.value, 2); // Fetch next page
+const toggleAllEmployees = (event) => {
+  if (event.target.checked) {
+    selectedEmployees.value = filteredEmployees.value.map((employee) => employee.value);
+  } else {
+    selectedEmployees.value = [];
+  }
 };
 
 const assignEmployees = async () => {
@@ -133,8 +288,32 @@ const assignEmployees = async () => {
   }
 };
 
+const assignSelectedEmployees = async () => {
+  if (!selectedTraining.value) {
+    alert("Please select a training.");
+    return;
+  }
+
+  try {
+    const employeeIds = selectedTableEmployees.value.map((employee) => employee.value);
+    await api.post("/trainings/assign", {
+      training_id: selectedTraining.value,
+      employee_ids: employeeIds,
+    });
+    alert("Selected employees assigned successfully!");
+  } catch (error) {
+    console.error("Failed to assign selected employees:", error.response?.data || error.message);
+    alert("Failed to assign selected employees. Please try again.");
+  }
+};
+
+// Watchers for working place and designation changes
+watch(selectedWorkingPlace, fetchEmployees);
+watch(selectedDesignation, fetchEmployees);
+
 onMounted(() => {
   fetchTrainings();
+  fetchDesignations();
   fetchEmployees();
 });
 </script>

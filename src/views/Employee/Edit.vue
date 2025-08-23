@@ -109,10 +109,27 @@ const { workingPlaces } = useWorkingPlaces(); // Use the composable to get worki
 const fetchEmployee = async () => {
   try {
     const response = await api.get(`/employees/${route.params.id}`);
-    employee.value = response.data.data || {};
+    const data = response.data.data || {};
+    employee.value = {
+      name: data.name || "",
+      designation_id: data.designation_id || "",
+      mobile: data.mobile || "",
+      email: data.email || "",
+      working_place: data.working_place || "",
+    };
   } catch (error) {
     console.error("Failed to fetch employee:", error.response?.data || error.message);
     alert("Failed to load employee data.");
+  }
+};
+
+const fetchDesignations = async () => {
+  try {
+    const response = await api.get("/designations");
+    designations.value = response.data.data || [];
+  } catch (error) {
+    console.error("Failed to fetch designations:", error.response?.data || error.message);
+    alert("Failed to load designations.");
   }
 };
 
@@ -128,6 +145,7 @@ const updateEmployee = async () => {
 };
 
 onMounted(() => {
+  fetchDesignations();
   fetchEmployee();
 });
 </script>
