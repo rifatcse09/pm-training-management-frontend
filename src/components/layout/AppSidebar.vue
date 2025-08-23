@@ -277,8 +277,8 @@ const menuGroups = [
         subItems: [
           { name: "List Trainings", path: "/training-management/list", pro: false },
           // { name: "Add Training", path: "/training-management/add", pro: false },
-          { name: "Assign Employees", path: "/training-management/assign", pro: false }, // New menu item
-          { name: "Assign List", path: "/training-management/assign-list", pro: false }, // New menu item
+          { name: "Add Employees in Training", path: "/training-management/assign", pro: false }, // New menu item
+          { name: "Employee Wise Trainings", path: "/training-management/assign-list", pro: false }, // New menu item
         ],
       },
     ],

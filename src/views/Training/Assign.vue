@@ -120,6 +120,7 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from "vue";
+import { useRouter } from "vue-router"; // Import useRouter
 import debounce from "lodash.debounce";
 import api from "@/composables/useApi";
 import { useWorkingPlaces } from "@/composables/useWorkingPlaces";
@@ -128,6 +129,7 @@ import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
 
+const router = useRouter(); // Initialize the router
 const currentPageTitle = ref("Assign Employees to Training");
 const selectedTraining = ref(null);
 const selectedEmployees = ref([]);
@@ -282,6 +284,7 @@ const assignEmployees = async () => {
       employee_ids: selectedEmployees.value.map((e) => e.value),
     });
     alert("Employees assigned successfully!");
+    router.push('/training-management/assign-list'); // Redirect to AssignList.vue
   } catch (error) {
     console.error("Failed to assign employees:", error.response?.data || error.message);
     alert("Failed to assign employees. Please try again.");
@@ -301,6 +304,7 @@ const assignSelectedEmployees = async () => {
       employee_ids: employeeIds,
     });
     alert("Selected employees assigned successfully!");
+    router.push("/training-management/assign-list"); // Redirect to AssignList.vue
   } catch (error) {
     console.error("Failed to assign selected employees:", error.response?.data || error.message);
     alert("Failed to assign selected employees. Please try again.");

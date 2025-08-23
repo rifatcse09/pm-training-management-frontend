@@ -44,14 +44,10 @@
               <tr v-for="assignment in assignments" :key="assignment.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ assignment.training_name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ assignment.employee_name }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(assignment.assigned_date) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.designation_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ getWorkingPlaceName(assignment.working_place) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.organizer_name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                  <router-link
-                    :to="`/training-management/assign/edit/${assignment.id}`"
-                    class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                  >
-                    Edit
-                  </router-link>
                   <button
                     @click="confirmDelete(assignment.id)"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
@@ -75,16 +71,20 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/composables/useApi'
+import { useWorkingPlaces } from "@/composables/useWorkingPlaces";
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
 const currentPageTitle = ref('Training Assignments')
+const { workingPlaces } = useWorkingPlaces();
 const columns = ref([
   { field: 'training_name', label: 'Training Name' },
   { field: 'employee_name', label: 'Employee Name' },
-  { field: 'assigned_date', label: 'Assigned Date' },
+  { field: 'designation_name', label: 'Designation' },
+  { field: 'working_place', label: 'Working Place' },
+  { field: 'organizer_name', label: 'Organizer' },
 ])
 
 const assignments = ref([])
@@ -96,6 +96,11 @@ const pagination = ref({
   per_page: 10,
 })
 
+// Function to get the working place name by ID
+const getWorkingPlaceName = (id) => {
+  const place = workingPlaces.value.find((place) => place.id == id);
+  return place ? place.name : "N/A";
+};
 const fetchAssignments = async (page = 1) => {
   try {
     const response = await api.get('/trainings/assignments', { params: { search: searchQuery.value, page } });
