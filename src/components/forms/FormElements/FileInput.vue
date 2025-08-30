@@ -1,25 +1,60 @@
 <template>
-  <div class="space-y-6">
-    <!-- Elements -->
-    <div>
-      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-        Upload file
-      </label>
-      <input
-        type="file"
-        @change="onFileSelected"
-        class="focus:border-ring-brand-300 h-11 w-full overflow-hidden rounded-lg border border-gray-300 bg-transparent text-sm text-gray-500 shadow-theme-xs transition-colors file:mr-5 file:border-collapse file:cursor-pointer file:rounded-l-lg file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-50 file:py-3 file:pl-3.5 file:pr-3 file:text-sm file:text-gray-700 placeholder:text-gray-400 hover:file:bg-gray-100 focus:outline-hidden focus:file:ring-brand-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:text-white/90 dark:file:border-gray-800 dark:file:bg-white/[0.03] dark:file:text-gray-400 dark:placeholder:text-gray-400"
-        ref="fileInput"
-      />
-    </div>
+  <div class="file-input-wrapper">
+    <label
+      for="file-input"
+      class="block text-sm font-medium text-gray-700 mb-1"
+    >
+      {{ label }}
+    </label>
+    <input
+      id="file-input"
+      type="file"
+      :name="name"
+      @change="onFileSelected"
+      class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    />
+    <p v-if="helperText" class="text-sm text-gray-500 mt-1">{{ helperText }}</p>
   </div>
 </template>
 
 <script setup>
-const emit = defineEmits(['file-selected']);
+import { defineProps, defineEmits } from "vue";
+
+defineProps({
+  name: {
+    type: String,
+    required: true,
+  },
+  label: {
+    type: String,
+    default: "Choose a file",
+  },
+  helperText: {
+    type: String,
+    default: "",
+  },
+});
+
+defineEmits(["file-selected"]);
 
 const onFileSelected = (event) => {
   const file = event.target.files[0];
-  emit('file-selected', file); // Emit the selected file
+  if (file) {
+    emit("file-selected", file);
+  }
 };
 </script>
+
+<style scoped>
+.file-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input[type="file"] {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+</style>
