@@ -55,39 +55,6 @@
                 />
                 <p v-if="errors.organization_id" class="text-red-500 text-sm mt-1">{{ errors.organization_id[0] }}</p>
               </div>
-              <div>
-                <label for="start_date" class="block text-sm font-medium text-gray-700 text-left">Start Date</label>
-                <flat-pickr
-                  v-model="training.start_date"
-                  :config="flatpickrConfig"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  placeholder="Select start date"
-                />
-              </div>
-              <div>
-                <label for="end_date" class="block text-sm font-medium text-gray-700 text-left">End Date</label>
-                <flat-pickr
-                  v-model="training.end_date"
-                  :config="flatpickrConfig"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  placeholder="Select end date"
-                />
-                <p v-if="errors.end_date" class="text-red-500 text-sm mt-1">{{ errors.end_date[0] }}</p>
-              </div>
-              <div>
-                <label for="total_days" class="block text-sm font-medium text-gray-700 text-left">Total Days</label>
-                <input
-                  id="total_days"
-                  v-model="training.total_days"
-                  type="number"
-                  placeholder="Enter total days"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  required
-                />
-              </div>
-              <div>
-                <FileInput name="file_link" @file-selected="handleFileUpload" />
-              </div>
             </div>
             <div class="mt-6 flex justify-start">
               <button
@@ -108,9 +75,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import debounce from "lodash.debounce";
-import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
-import FileInput from "@/components/forms/FormElements/FileInput.vue";
 import api from "@/composables/useApi";
 import { extractData } from "@/utils/apiResponseHandler";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
@@ -126,10 +91,6 @@ const training = ref({
   name: "",
   type: "",
   organization_id: "",
-  start_date: "",
-  end_date: "",
-  total_days: "",
-  file_link: null,
   countries: [],
 });
 
@@ -153,11 +114,6 @@ const pagination = ref({
   total: 0,
 });
 
-const flatpickrConfig = {
-  dateFormat: "Y-m-d",
-  altInput: true,
-  altFormat: "F j, Y",
-};
 
 const fetchTraining = async () => {
   try {
@@ -168,10 +124,6 @@ const fetchTraining = async () => {
       name: data.name,
       type: data.type.toString(),
       organization_id: data.organization_id,
-      start_date: data.start_date,
-      end_date: data.end_date,
-      total_days: data.total_days,
-      file_link: null,
       countries: data.countries || [],
     };
 
@@ -251,11 +203,6 @@ const fetchCountries = async () => {
   }
 };
 
-const handleFileUpload = (file) => {
-  if (file) {
-    training.value.file_link = file;
-  }
-};
 
 const handleTypeChange = () => {
   if (training.value.type === "2") {

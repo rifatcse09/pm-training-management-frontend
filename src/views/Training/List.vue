@@ -55,30 +55,6 @@
                   scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Start Date
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  End Date
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Total Days
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  File
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
                   Actions
                 </th>
               </tr>
@@ -93,26 +69,6 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ training.organization_name|| 'N/A' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ training.start_date }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ training.end_date }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ training.total_days }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <a
-                    v-if="training.file_link"
-                    :href="training.file_link"
-                    target="_blank"
-                    class="text-blue-500 hover:underline"
-                  >
-                    Download
-                  </a>
-                  <span v-else class="text-gray-500">No File</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <router-link
@@ -131,7 +87,7 @@
               </tr>
               <tr v-if="trainings.length === 0">
                 <td
-                  colspan="8"
+                  colspan="4"
                   class="px-6 py-4 text-center text-sm text-gray-500"
                 >
                   No trainings found.
