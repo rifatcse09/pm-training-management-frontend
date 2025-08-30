@@ -57,6 +57,8 @@
                   name="file_link"
                   label="Upload Training Document"
                   helperText="Accepted formats: PDF, DOC, DOCX. Max size: 2MB."
+                  accept="application/pdf, .doc, .docx"
+                  :error="errors.file_link ? errors.file_link[0] : ''"
                   @file-selected="handleFileUpload"
                 />
                 <p v-if="errors.file_link" class="text-red-500 text-sm mt-1">{{ errors.file_link[0] }}</p>
@@ -209,7 +211,7 @@ const flatpickrConfig = {
 
 const handleFileUpload = (file) => {
   if (file) {
-    assignment.value.file_link = file;
+    assignment.value.file_link = file; // Assign the selected file to the file_link property
   }
 };
 
@@ -228,9 +230,12 @@ const assignEmployees = async () => {
   formData.append("start_date", assignment.value.start_date);
   formData.append("end_date", assignment.value.end_date);
   formData.append("total_days", assignment.value.total_days);
+
+  // Append the file_link if it exists
   if (assignment.value.file_link) {
     formData.append("file_link", assignment.value.file_link);
   }
+
   selectedEmployees.value.forEach((employee) => {
     formData.append("employee_ids[]", employee.value);
   });
