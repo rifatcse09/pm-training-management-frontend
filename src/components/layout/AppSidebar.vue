@@ -20,29 +20,7 @@
       ]"
     >
       <router-link to="/" class="flex items-center">
-        <!-- <img
-          v-if="isExpanded || isHovered || isMobileOpen"
-          class="dark:hidden"
-          src="/images/logo/logo.svg"
-          alt="Logo"
-          width="150"
-          height="40"
-        />
-        <img
-          v-if="isExpanded || isHovered || isMobileOpen"
-          class="hidden dark:block"
-          src="/images/logo/logo-dark.svg"
-          alt="Logo"
-          width="150"
-          height="40"
-        />
-        <img
-          v-else
-          src="/images/logo/logo-icon.svg"
-          alt="Logo"
-          width="32"
-          height="32"
-        /> -->
+
         <span
           v-if="isExpanded || isHovered || isMobileOpen"
           class="ml-2 text-lg font-semibold text-gray-900 dark:text-white"
@@ -218,28 +196,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 import {
   GridIcon,
-  CalenderIcon,
   UserCircleIcon,
-  ChatIcon,
-  MailIcon,
-  DocsIcon,
-  PieChartIcon,
   ChevronDownIcon,
   HorizontalDots,
-  PageIcon,
-  TableIcon,
-  ListIcon,
-  PlugInIcon,
   BriefcaseIcon,
   BookOpenIcon, // Add an icon for Training Management
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
-import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
@@ -253,7 +221,16 @@ const menuGroups = [
       {
         icon: GridIcon,
         name: "Dashboard",
-        subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+        path: "/dashboard", // Updated to a main item with /dashboard path
+      },
+      {
+        icon: BookOpenIcon,
+        name: "Training Management",
+        subItems: [
+          { name: "List Trainings", path: "/training-management/list", pro: false },
+          { name: "Add Employees in Training", path: "/training-management/assign", pro: false },
+          { name: "Employee Wise Trainings", path: "/training-management/assign-list", pro: false },
+        ],
       },
       {
         icon: UserCircleIcon,
@@ -271,49 +248,11 @@ const menuGroups = [
           { name: "Add Organizer", path: "/organizer-management/add", pro: false },
         ],
       },
-      {
-        icon: BookOpenIcon,
-        name: "Training Management",
-        subItems: [
-          { name: "List Trainings", path: "/training-management/list", pro: false },
-          // { name: "Add Training", path: "/training-management/add", pro: false },
-          { name: "Add Employees in Training", path: "/training-management/assign", pro: false }, // New menu item
-          { name: "Employee Wise Trainings", path: "/training-management/assign-list", pro: false }, // New menu item
-        ],
-      },
     ],
   },
   {
     title: "Settings",
     items: [
-      // {
-      //   icon: PieChartIcon,
-      //   name: "Charts",
-      //   subItems: [
-      //     { name: "Line Chart", path: "/line-chart", pro: false },
-      //     { name: "Bar Chart", path: "/bar-chart", pro: false },
-      //   ],
-      // },
-      // {
-      //   icon: BoxCubeIcon,
-      //   name: "Ui Elements",
-      //   subItems: [
-      //     { name: "Alerts", path: "/alerts", pro: false },
-      //     { name: "Avatars", path: "/avatars", pro: false },
-      //     { name: "Badge", path: "/badge", pro: false },
-      //     { name: "Buttons", path: "/buttons", pro: false },
-      //     { name: "Images", path: "/images", pro: false },
-      //     { name: "Videos", path: "/videos", pro: false },
-      //   ],
-      // },
-      // {
-      //   icon: PlugInIcon,
-      //   name: "Authentication",
-      //   subItems: [
-      //     { name: "Signin", path: "/", pro: false },
-      //     { name: "Signup", path: "/signup", pro: false },
-      //   ],
-      // },
       {
         icon: UserCircleIcon,
         name: "User Management",
