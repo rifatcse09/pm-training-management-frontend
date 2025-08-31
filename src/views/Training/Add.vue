@@ -55,39 +55,6 @@
                 />
                 <p v-if="errors.organization_id" class="text-red-500 text-sm mt-1">{{ errors.organization_id[0] }}</p>
               </div>
-              <div>
-                <label for="start_date" class="block text-sm font-medium text-gray-700 text-left">Start Date</label>
-                <flat-pickr
-                  v-model="training.start_date"
-                  :config="flatpickrConfig"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  placeholder="Select start date"
-                />
-              </div>
-              <div>
-                <label for="end_date" class="block text-sm font-medium text-gray-700 text-left">End Date</label>
-                <flat-pickr
-                  v-model="training.end_date"
-                  :config="flatpickrConfig"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  placeholder="Select end date"
-                />
-                <p v-if="errors.end_date" class="text-red-500 text-sm mt-1">{{ errors.end_date[0] }}</p>
-              </div>
-              <div>
-                <label for="total_days" class="block text-sm font-medium text-gray-700 text-left">Total Days</label>
-                <input
-                  id="total_days"
-                  v-model="training.total_days"
-                  type="number"
-                  placeholder="Enter total days"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  required
-                />
-              </div>
-              <div>
-                <FileInput name="file_link" @file-selected="handleFileUpload" />
-              </div>
             </div>
             <div class="mt-6 flex justify-start">
               <button
@@ -106,7 +73,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router"; // Import useRouter
+import { useRouter } from "vue-router";
 import debounce from "lodash.debounce";
 import api from "@/composables/useApi";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
@@ -114,21 +81,14 @@ import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
 import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
-import FileInput from "@/components/forms/FormElements/FileInput.vue";
-import flatPickr from "vue-flatpickr-component";
-import "flatpickr/dist/flatpickr.css";
 
-const router = useRouter(); // Initialize the router instance
+const router = useRouter();
 
 const currentPageTitle = ref("Add Training");
 const training = ref({
   name: "",
   type: "",
   organization_id: "",
-  start_date: "",
-  end_date: "",
-  total_days: "",
-  file_link: null,
   countries: [],
 });
 
@@ -145,12 +105,6 @@ const pagination = ref({
   per_page: 10,
   total: 0,
 });
-
-const flatpickrConfig = {
-  dateFormat: "Y-m-d",
-  altInput: true,
-  altFormat: "F j, Y",
-};
 
 const fetchOrganizations = async (query = "", page = 1) => {
   if (loading.value) return;
@@ -213,12 +167,6 @@ const fetchCountries = async () => {
   }
 };
 
-const handleFileUpload = (file) => {
-  if (file) {
-    training.value.file_link = file;
-  }
-};
-
 const handleTypeChange = () => {
   if (training.value.type === "2") {
     fetchCountries();
@@ -231,7 +179,6 @@ const addTraining = async () => {
   const formData = new FormData();
   Object.entries(training.value).forEach(([key, val]) => {
     if (key === "countries") return;
-    if (key === "file_link" && !val) return;
     formData.append(key, val);
   });
 
@@ -244,7 +191,7 @@ const addTraining = async () => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     alert("Training added successfully!");
-    router.push("/training-management/list"); // Redirect to the training list page
+    router.push("/training-management/list");
   } catch (error) {
     if (error.response && error.response.data.errors) {
       errors.value = error.response.data.errors;

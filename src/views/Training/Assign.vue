@@ -20,33 +20,76 @@
                 />
                 <p v-if="errors.training" class="text-red-500 text-sm mt-1">{{ errors.training[0] }}</p>
               </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label for="workingPlace" class="block text-sm font-medium text-gray-700 text-left">Filter by Working Place</label>
-                  <select
-                    id="workingPlace"
-                    v-model="selectedWorkingPlace"
-                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                    required
-                  >
-                    <option value="" disabled>Select working place</option>
-                    <option v-for="place in workingPlaces" :key="place.id" :value="place.id">
-                      {{ place.name }}
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label for="designation" class="block text-sm font-medium text-gray-700 text-left">Filter by Designation</label>
-                  <CustomDropdown
-                    :options="designations"
-                    v-model="selectedDesignation"
-                    :reduce="designation => designation.value"
-                    placeholder="Select designation..."
-                  />
-                </div>
+              <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 text-left">Start Date</label>
+                <flat-pickr
+                  v-model="assignment.start_date"
+                  :config="flatpickrConfig"
+                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                  placeholder="Select start date"
+                />
+                <p v-if="errors.start_date" class="text-red-500 text-sm mt-1">{{ errors.start_date[0] }}</p>
+              </div>
+              <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 text-left">End Date</label>
+                <flat-pickr
+                  v-model="assignment.end_date"
+                  :config="flatpickrConfig"
+                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                  placeholder="Select end date"
+                />
+                <p v-if="errors.end_date" class="text-red-500 text-sm mt-1">{{ errors.end_date[0] }}</p>
+              </div>
+              <div>
+                <label for="total_days" class="block text-sm font-medium text-gray-700 text-left">Total Days</label>
+                <input
+                  id="total_days"
+                  v-model="assignment.total_days"
+                  type="number"
+                  placeholder="Enter total days"
+                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                  required
+                />
+                <p v-if="errors.total_days" class="text-red-500 text-sm mt-1">{{ errors.total_days[0] }}</p>
+              </div>
+              <div>
+                <FileInput
+                  name="file_link"
+                  label="Upload Training Document"
+                  helperText="Accepted formats: PDF, DOC, DOCX. Max size: 2MB."
+                  accept="application/pdf, .doc, .docx"
+                  :error="errors.file_link ? errors.file_link[0] : ''"
+                  @file-selected="handleFileUpload"
+                />
+                <p v-if="errors.file_link" class="text-red-500 text-sm mt-1">{{ errors.file_link[0] }}</p>
               </div>
               <div>
                 <label for="employees" class="block text-sm font-medium text-gray-700 text-left">Select Employees</label>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label for="workingPlace" class="block text-sm font-medium text-gray-700 text-left">Filter by Working Place</label>
+                    <select
+                      id="workingPlace"
+                      v-model="selectedWorkingPlace"
+                      class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                      required
+                    >
+                      <option value="" disabled>Select working place</option>
+                      <option v-for="place in workingPlaces" :key="place.id" :value="place.id">
+                        {{ place.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="designation" class="block text-sm font-medium text-gray-700 text-left">Filter by Designation</label>
+                    <CustomDropdown
+                      :options="designations"
+                      v-model="selectedDesignation"
+                      :reduce="designation => designation.value"
+                      placeholder="Select designation..."
+                    />
+                  </div>
+                </div>
                 <table class="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
@@ -61,7 +104,7 @@
                   <tbody>
                     <tr v-for="employee in filteredEmployees" :key="employee.value">
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <input type="checkbox" v-model="selectedEmployees" :value="employee" @change="addToSelectedTable(employee)" />
+                        <input type="checkbox" v-model="selectedEmployees" :value="employee" />
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">{{ employee.label }}</td>
                       <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation + ' ' + employee.grade }}</td>
@@ -82,7 +125,7 @@
             <h3 class="text-lg font-medium text-gray-700">Selected Employees</h3>
             <button
               class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-              @click="assignSelectedEmployees"
+              @click="assignEmployees"
             >
               Assign Selected
             </button>
@@ -97,7 +140,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="employee in selectedTableEmployees" :key="employee.value">
+              <tr v-for="employee in selectedEmployees" :key="employee.value">
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.label }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ employee.designation + ' ' + employee.grade }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ getWorkingPlaceName(employee.workingPlace) }}</td>
@@ -106,7 +149,7 @@
                     class="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                     @click="removeFromSelectedTable(employee)"
                   >
-                    Delete
+                    Remove
                   </button>
                 </td>
               </tr>
@@ -120,7 +163,7 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from "vue";
-import { useRouter } from "vue-router"; // Import useRouter
+import { useRouter } from "vue-router";
 import debounce from "lodash.debounce";
 import api from "@/composables/useApi";
 import { useWorkingPlaces } from "@/composables/useWorkingPlaces";
@@ -128,12 +171,14 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
+import flatPickr from "vue-flatpickr-component";
+import FileInput from "@/components/forms/FormElements/FileInput.vue";
 
-const router = useRouter(); // Initialize the router
+const router = useRouter();
 const currentPageTitle = ref("Assign Employees to Training");
 const selectedTraining = ref(null);
 const selectedEmployees = ref([]);
-const selectedTableEmployees = ref([]); // Store employees in the lower table
+const selectedTableEmployees = ref([]);
 const trainings = ref([]);
 const employees = ref([]);
 const filteredEmployees = ref([]);
@@ -144,7 +189,6 @@ const trainingSearchQuery = ref("");
 const loading = ref(false);
 const errors = ref({});
 const { workingPlaces } = useWorkingPlaces();
-
 const pagination = ref({
   current_page: 1,
   last_page: 1,
@@ -152,7 +196,62 @@ const pagination = ref({
   total: 0,
 });
 
-// Function to get the working place name by ID
+const assignment = ref({
+  start_date: "",
+  end_date: "",
+  total_days: "",
+  file_link: null,
+});
+
+const flatpickrConfig = {
+  dateFormat: "Y-m-d",
+  altInput: true,
+  altFormat: "F j, Y",
+};
+
+const handleFileUpload = (file) => {
+  if (file) {
+    assignment.value.file_link = file; // Assign the selected file to the file_link property
+  }
+};
+
+const assignEmployees = async () => {
+  if (!selectedTraining.value) {
+    alert("Please select a training.");
+    return;
+  }
+  if (selectedEmployees.value.length === 0) {
+    alert("Please select at least one employee.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("training_id", selectedTraining.value);
+  formData.append("start_date", assignment.value.start_date);
+  formData.append("end_date", assignment.value.end_date);
+  formData.append("total_days", assignment.value.total_days);
+
+  // Append the file_link if it exists
+  if (assignment.value.file_link) {
+    formData.append("file_link", assignment.value.file_link);
+  }
+
+  selectedEmployees.value.forEach((employee) => {
+    formData.append("employee_ids[]", employee.value);
+  });
+
+  try {
+    await api.post("/trainings/assign", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    alert("Employees assigned successfully!");
+    router.push("/training-management/assign-list");
+  } catch (error) {
+    console.error("Failed to assign employees:", error.response?.data || error.message);
+    errors.value = error.response?.data?.errors || {};
+  }
+};
+
 const getWorkingPlaceName = (id) => {
   const place = workingPlaces.value.find((place) => place.id == id);
   return place ? place.name : "N/A";
@@ -161,7 +260,6 @@ const getWorkingPlaceName = (id) => {
 const addToSelectedTable = (employee) => {
   if (!selectedTableEmployees.value.find((e) => e.value === employee.value)) {
     selectedTableEmployees.value.push(employee);
-    saveEmployeeToAPI(employee);
   }
 };
 
@@ -172,11 +270,9 @@ const removeFromSelectedTable = (employee) => {
 const fetchTrainings = async (query = "", page = 1) => {
   if (loading.value) return;
   loading.value = true;
-
   try {
     const response = await api.get("/trainings", { params: { search: query, page } });
     const data = response.data;
-
     if (page === 1) {
       trainings.value = data.data.map((training) => ({
         value: training.id,
@@ -191,7 +287,6 @@ const fetchTrainings = async (query = "", page = 1) => {
         })),
       ];
     }
-
     pagination.value = data.meta || {
       current_page: 1,
       last_page: 1,
@@ -265,49 +360,6 @@ const toggleAllEmployees = (event) => {
     selectedEmployees.value = filteredEmployees.value.map((employee) => employee.value);
   } else {
     selectedEmployees.value = [];
-  }
-};
-
-const assignEmployees = async () => {
-  if (!selectedTraining.value) {
-    alert("Please select a training.");
-    return;
-  }
-  if (selectedEmployees.value.length === 0) {
-    alert("Please select at least one employee.");
-    return;
-  }
-
-  try {
-    await api.post("/trainings/assign", {
-      training_id: selectedTraining.value,
-      employee_ids: selectedEmployees.value.map((e) => e.value),
-    });
-    alert("Employees assigned successfully!");
-    router.push('/training-management/assign-list'); // Redirect to AssignList.vue
-  } catch (error) {
-    console.error("Failed to assign employees:", error.response?.data || error.message);
-    alert("Failed to assign employees. Please try again.");
-  }
-};
-
-const assignSelectedEmployees = async () => {
-  if (!selectedTraining.value) {
-    alert("Please select a training.");
-    return;
-  }
-
-  try {
-    const employeeIds = selectedTableEmployees.value.map((employee) => employee.value);
-    await api.post("/trainings/assign", {
-      training_id: selectedTraining.value,
-      employee_ids: employeeIds,
-    });
-    alert("Selected employees assigned successfully!");
-    router.push("/training-management/assign-list"); // Redirect to AssignList.vue
-  } catch (error) {
-    console.error("Failed to assign selected employees:", error.response?.data || error.message);
-    alert("Failed to assign selected employees. Please try again.");
   }
 };
 

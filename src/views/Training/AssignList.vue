@@ -57,6 +57,19 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ assignment.designation_name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ getWorkingPlaceName(assignment.working_place) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ assignment.organizer_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.start_date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.end_date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.total_days }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <a
+                    v-if="assignment.file_link"
+                    :href="assignment.file_link"
+                    target="_blank"
+                    class="text-blue-500 underline"
+                  >
+                    View File
+                  </a>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <button
                     @click="confirmDelete(assignment.id)"
@@ -96,6 +109,10 @@ const columns = ref([
   { field: 'designation_name', label: 'Designation' },
   { field: 'working_place', label: 'Working Place' },
   { field: 'organizer_name', label: 'Organizer' },
+  { field: 'start_date', label: 'Start Date' },
+  { field: 'end_date', label: 'End Date' },
+  { field: 'total_days', label: 'Total Days' },
+  { field: 'file_link', label: 'File Link' },
 ]);
 
 const assignments = ref([]);
