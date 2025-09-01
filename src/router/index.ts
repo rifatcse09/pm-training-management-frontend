@@ -4,6 +4,7 @@ import ActiveUserList from "@/views/UserManagement/ActiveUserList.vue";
 import List from "@/views/Employee/List.vue";
 import Add from "@/views/Employee/Add.vue";
 import Edit from "@/views/Employee/Edit.vue";
+import TrainingReport from "@/views/ReportManagement/TrainingReport.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,7 +17,7 @@ const router = createRouter({
       name: 'Dashboard',
       component: () => import('../views/Ecommerce.vue'),
       meta: {
-        title: 'eCommerce Dashboard',
+        title: 'Training Management Dashboard',
         requiresAuth: true,
       },
     },
@@ -179,6 +180,7 @@ const router = createRouter({
       name: 'ActiveUserList',
       component: ActiveUserList,
       meta: {
+        title: 'Active User List',
         requiresAuth: true,
       },
     },
@@ -214,17 +216,29 @@ const router = createRouter({
       path: "/organizer-management/add",
       name: "AddOrganizer",
       component: () => import("@/views/Organizer/Add.vue"),
+      meta: {
+        title: 'Add Organizer',
+        requiresAuth: true,
+      },
     },
     {
       path: "/organizer-management/list",
       name: "ListOrganizers",
       component: () => import("@/views/Organizer/List.vue"),
+      meta: {
+        title: 'Organizer List',
+        requiresAuth: true,
+      },
     },
     {
       path: '/organizer-management/edit/:id',
       name: 'EditOrganizer',
       component: () => import('@/views/Organizer/Edit.vue'),
       props: true,
+      meta: {
+        title: 'Organizer Edit',
+        requiresAuth: true,
+      },
     },
     {
       path: '/training-management/list',
@@ -258,12 +272,28 @@ const router = createRouter({
       path: '/training-management/assign',
       name: 'AssignEmployees',
       component: () => import('@/views/Training/Assign.vue'),
-      meta: { requiresAuth: true },
+      meta: {
+        title: 'Employee assign in Training', 
+        requiresAuth: true 
+      },
     },
     {
       path: '/training-management/assign-list',
       name: 'AssignList',
       component: () => import('@/views/Training/AssignList.vue'),
+      meta: {
+        title: 'Assigned Employee List', 
+        requiresAuth: true 
+      },
+    },
+    {
+      path: "/report-management/training-report",
+      name: "TrainingReport",
+      component: TrainingReport,
+      meta: {
+        title: 'Training Report', 
+        requiresAuth: true 
+      },
     },
   ],
 })
@@ -280,7 +310,7 @@ router.beforeEach((to, from, next) => {
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
+  document.title = `Planning Division ${to.meta.title}`
   next()
 })
 
