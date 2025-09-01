@@ -64,7 +64,18 @@
                 <p v-if="errors.file_link" class="text-red-500 text-sm mt-1">{{ errors.file_link[0] }}</p>
               </div>
               <div>
-                <label for="employees" class="block text-sm font-medium text-gray-700 text-left">Select Employees</label>
+                <label for="searchEmployee" class="block text-sm font-medium text-gray-700 text-left">Search Employee</label>
+                <input
+                  id="searchEmployee"
+                  v-model="employeeSearchQuery"
+                  type="text"
+                  placeholder="Search by name or email"
+                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                  @input="fetchEmployees"
+                />
+              </div>
+              <div>
+              
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label for="workingPlace" class="block text-sm font-medium text-gray-700 text-left">Filter by Working Place</label>
@@ -185,6 +196,7 @@ const filteredEmployees = ref([]);
 const designations = ref([]);
 const selectedWorkingPlace = ref("");
 const selectedDesignation = ref(null);
+const employeeSearchQuery = ref(""); // Add search query
 const trainingSearchQuery = ref("");
 const loading = ref(false);
 const errors = ref({});
@@ -257,12 +269,6 @@ const getWorkingPlaceName = (id) => {
   return place ? place.name : "N/A";
 };
 
-const addToSelectedTable = (employee) => {
-  if (!selectedTableEmployees.value.find((e) => e.value === employee.value)) {
-    selectedTableEmployees.value.push(employee);
-  }
-};
-
 const removeFromSelectedTable = (employee) => {
   selectedTableEmployees.value = selectedTableEmployees.value.filter((e) => e.value !== employee.value);
 };
@@ -331,13 +337,14 @@ const fetchDesignations = async () => {
   }
 };
 
-const fetchEmployees = async () => {
+const fetchEmployees = debounce(async () => {
   loading.value = true;
   try {
     const response = await api.get("/employees", {
       params: {
         working_place: selectedWorkingPlace.value || null,
         designation_id: selectedDesignation.value || null,
+        search: employeeSearchQuery.value || null, // Include search query
       },
     });
     employees.value = response.data.data.map((employee) => ({
@@ -353,7 +360,7 @@ const fetchEmployees = async () => {
   } finally {
     loading.value = false;
   }
-};
+}, 500);
 
 const toggleAllEmployees = (event) => {
   if (event.target.checked) {
