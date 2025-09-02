@@ -26,7 +26,7 @@
       <div class="flex items-end justify-between mt-5">
         <div>
           <span class="text-sm text-gray-500 dark:text-gray-400">মোট প্রশিক্ষণ</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">3,782</h4>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">6,796</h4>
         </div>
       </div>
     </div>
@@ -56,8 +56,8 @@
 
       <div class="flex items-end justify-between mt-5">
         <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">স্থানীয় ট্রেনিং</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">5,359</h4>
+          <span class="text-sm text-gray-500 dark:text-gray-400">স্থানীয় প্রশিক্ষণ</span>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">5,605</h4>
         </div>
       </div>
     </div>
@@ -87,8 +87,8 @@
 
       <div class="flex items-end justify-between mt-5">
         <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">বৈদেশিক ট্রেনিং</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">1,245</h4>
+          <span class="text-sm text-gray-500 dark:text-gray-400">বৈদেশিক প্রশিক্ষণ</span>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">1,191</h4>
         </div>
       </div>
     </div>
