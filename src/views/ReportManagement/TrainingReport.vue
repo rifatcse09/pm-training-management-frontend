@@ -25,7 +25,7 @@
                 <MultipleSelect
                   id="fiscalYear"
                   v-model="filters.fiscalYears"
-                  :options="fiscalYears"
+                  :options="uniqueFiscalYears"
                   :reduce="year => year.value"
                   placeholder="Select fiscal years..."
                 />
@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
@@ -106,6 +106,14 @@ const generateFiscalYears = () => {
 
 const fiscalYears = ref(generateFiscalYears());
 
+// Ensure unique fiscal years in the dropdown
+const uniqueFiscalYears = computed(() => {
+  const unique = new Set(fiscalYears.value.map(year => year.value));
+  return Array.from(unique).map(value => {
+    return fiscalYears.value.find(year => year.value === value);
+  });
+});
+
 const flatpickrConfig = {
   dateFormat: "Y-m-d",
   altInput: true,
@@ -120,7 +128,7 @@ const generateReport = async () => {
     const response = await api.get('/training-reports', {
       params: {
         subject: filters.value.subject,
-        fiscal_years: filters.value.fiscalYears,
+        fiscal_years: [...new Set(filters.value.fiscalYears.map(fy => fy.value))], // Ensure unique fiscal years
         start_date: filters.value.startDate,
         end_date: filters.value.endDate,
       },
@@ -142,52 +150,4 @@ const generateReport = async () => {
     loading.value = false;
   }
 };
-
-// assuming `api` is an axios instance
-// const generateReport = async () => {
-//   // loading.value = true;
-//   try {
-//     const response = await api.get('/training-reports', {
-//       params: {
-//         subject: filters.value.subject || '',
-//         fiscal_years: filters.value.fiscalYears || '',
-//         start_date: filters.value.startDate || '',
-//         end_date: filters.value.endDate || '',
-//       },
-//       headers: { Accept: 'application/pdf' },
-//       responseType: 'blob',
-//       // withCredentials: false, // set true only if you need cookies
-//     });
-
-//     // Try to extract filename from Content-Disposition
-//     let filename = 'training_report.pdf';
-//     const dispo = response.headers['content-disposition'];
-//     if (dispo) {
-//       const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(dispo);
-//       if (match && match[1]) filename = match[1].replace(/['"]/g, '');
-//     }
-
-//     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-//     const link = document.createElement('a');
-//     link.href = url;
-//     link.setAttribute('download', filename);
-//     document.body.appendChild(link);
-//     link.click();
-//     link.remove();
-//     window.URL.revokeObjectURL(url);
-//   } catch (err) {
-//     // If backend returns JSON error, try to read it
-//     if (err.response?.data instanceof Blob) {
-//       try {
-//         const text = await err.response.data.text();
-//         console.error('PDF error:', text);
-//       } catch {}
-//     }
-//     console.error('Error generating report:', err);
-//     alert('Report generation failed. Please try again.');
-//   } finally {
-//     // loading.value = false;
-//   }
-// };
-
 </script>
