@@ -4,7 +4,7 @@
     <div class="flex justify-start">
       <div class="w-full max-w-2xl space-y-5 sm:space-y-6">
         <ComponentCard title="Training Report" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-          <form @submit.prevent="filterReport" class="text-left">
+          <form @submit.prevent="generateReport" class="text-left">
             <div class="grid grid-cols-1 gap-6">
               <div>
                 <label for="subject" class="block text-sm font-medium text-gray-700 text-left">Subject</label>
@@ -54,9 +54,11 @@
             <div class="mt-6 flex justify-start">
               <button
                 type="submit"
+                :disabled="loading"
                 class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 text-left"
               >
-                Run Report
+                <span v-if="!loading">Run Report</span>
+                <span v-else>Loading...</span>
               </button>
             </div>
           </form>
@@ -74,6 +76,7 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
+import api from '@/composables/useApi'
 
 const currentPageTitle = ref("Training Report");
 const filters = ref({
@@ -109,8 +112,82 @@ const flatpickrConfig = {
   altFormat: "F j, Y",
 };
 
-const filterReport = () => {
-  console.log("Filters applied:", filters.value);
-  alert("Report filtered successfully!");
+const loading = ref(false);
+
+const generateReport = async () => {
+  loading.value = true;
+  try {
+    const response = await api.get('/training-reports', {
+      params: {
+        subject: filters.value.subject,
+        fiscal_years: filters.value.fiscalYears,
+        start_date: filters.value.startDate,
+        end_date: filters.value.endDate,
+      },
+      headers: { 'Accept': 'application/pdf' },
+      responseType: 'blob', // Ensure the response is treated as a binary file
+    });
+
+    // Create a Blob from the response and download the file
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'training_report.pdf'); // Set the file name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error('Error generating report:', err);
+  } finally {
+    loading.value = false;
+  }
 };
+
+// assuming `api` is an axios instance
+// const generateReport = async () => {
+//   // loading.value = true;
+//   try {
+//     const response = await api.get('/training-reports', {
+//       params: {
+//         subject: filters.value.subject || '',
+//         fiscal_years: filters.value.fiscalYears || '',
+//         start_date: filters.value.startDate || '',
+//         end_date: filters.value.endDate || '',
+//       },
+//       headers: { Accept: 'application/pdf' },
+//       responseType: 'blob',
+//       // withCredentials: false, // set true only if you need cookies
+//     });
+
+//     // Try to extract filename from Content-Disposition
+//     let filename = 'training_report.pdf';
+//     const dispo = response.headers['content-disposition'];
+//     if (dispo) {
+//       const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(dispo);
+//       if (match && match[1]) filename = match[1].replace(/['"]/g, '');
+//     }
+
+//     const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.setAttribute('download', filename);
+//     document.body.appendChild(link);
+//     link.click();
+//     link.remove();
+//     window.URL.revokeObjectURL(url);
+//   } catch (err) {
+//     // If backend returns JSON error, try to read it
+//     if (err.response?.data instanceof Blob) {
+//       try {
+//         const text = await err.response.data.text();
+//         console.error('PDF error:', text);
+//       } catch {}
+//     }
+//     console.error('Error generating report:', err);
+//     alert('Report generation failed. Please try again.');
+//   } finally {
+//     // loading.value = false;
+//   }
+// };
+
 </script>
