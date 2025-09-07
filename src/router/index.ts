@@ -273,27 +273,28 @@ const router = createRouter({
       name: 'AssignEmployees',
       component: () => import('@/views/Training/Assign.vue'),
       meta: {
-        title: 'Employee assign in Training', 
-        requiresAuth: true 
+        title: 'Employee assign in Training',
+        requiresAuth: true
       },
+
     },
     {
       path: '/training-management/assign-list',
       name: 'AssignList',
       component: () => import('@/views/Training/AssignList.vue'),
       meta: {
-        title: 'Assigned Employee List', 
-        requiresAuth: true 
-      },
+        title: 'Assigned Employee List',
+       requiresAuth: true
+     },
     },
     {
       path: "/report-management/training-report",
       name: "TrainingReport",
       component: TrainingReport,
       meta: {
-        title: 'Training Report', 
-        requiresAuth: true 
-      },
+        title: 'Training Report',
+       requiresAuth: true
+     },
     },
   ],
 })
