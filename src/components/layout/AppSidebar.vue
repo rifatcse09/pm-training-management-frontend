@@ -206,6 +206,7 @@ import {
   HorizontalDots,
   BriefcaseIcon,
   BookOpenIcon, // Add an icon for Training Management
+  CalenderIcon // Add an icon for Report Management
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import { useSidebar } from "@/composables/useSidebar";
@@ -246,6 +247,13 @@ const menuGroups = [
         subItems: [
           { name: "List Organizers", path: "/organizer-management/list", pro: false },
           { name: "Add Organizer", path: "/organizer-management/add", pro: false },
+        ],
+      },
+      {
+        icon: CalenderIcon,
+        name: "Report Management",
+        subItems: [
+          { name: "Training Report", path: "/report-management/training-report", pro: false },
         ],
       },
     ],

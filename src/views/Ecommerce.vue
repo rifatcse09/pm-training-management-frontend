@@ -4,7 +4,7 @@
       <!-- Full-width section -->
       <div class="col-span-12 space-y-6">
         <ecommerce-metrics />
-        <monthly-target />
+        <!-- <monthly-target /> -->
       </div>
     </div>
   </admin-layout>
@@ -13,15 +13,15 @@
 <script>
 import AdminLayout from '../components/layout/AdminLayout.vue'
 import EcommerceMetrics from '../components/ecommerce/EcommerceMetrics.vue'
-import MonthlyTarget from '../components/ecommerce/MonthlySale.vue'
-import MonthlySale from '../components/ecommerce/MonthlyTarget.vue'
+//mport MonthlyTarget from '../components/ecommerce/MonthlySale.vue'
+//import MonthlySale from '../components/ecommerce/MonthlyTarget.vue'
 
 export default {
   components: {
     AdminLayout,
     EcommerceMetrics,
-    MonthlyTarget,
-    MonthlySale
+    //MonthlyTarget,
+    //MonthlySale
   },
   name: 'Ecommerce',
 }
