@@ -140,7 +140,7 @@
                         </label>
                       </div>
                       <router-link
-                        to="/reset-password"
+                        to="/forgot-password"
                         class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
                         >Forgot password?</router-link
                       >
@@ -172,21 +172,6 @@
             </div>
           </div>
         </div>
-        <!-- <div
-          class="relative items-center hidden w-full h-full lg:w-1/2 bg-maroon-950 dark:bg-white/5 lg:grid"
-        >
-          <div class="flex items-center justify-center z-1">
-            <common-grid-shape />
-            <div class="flex flex-col items-center max-w-xs">
-              <router-link to="/" class="block mb-4">
-                <img width="{231}" height="{48}" src="/images/logo/bangladesh-govt-logo.svg" alt="Logo" />
-              </router-link>
-              <p class="text-center text-gray-400 dark:text-white/60">
-                Planning Division
-              </p>
-            </div>
-          </div>
-        </div> -->
       </div>
     </div>
   </FullScreenLayout>
@@ -197,7 +182,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
-import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import { extractData } from '@/utils/apiResponseHandler' // Import utility function
 
@@ -223,10 +207,10 @@ const handleSubmit = async () => {
       password: password.value,
     })
 
-    const { access_token, user } = extractData(response) // Use utility function to extract data
+    const { access_token, user, expires_in } = extractData(response) // Use utility function to extract data
 
-    if (access_token && user) {
-      authStore.setAuthData({ access_token, user }) // Set token and user data directly
+    if (access_token && user && typeof expires_in === 'number') {
+      authStore.setAuthData({ access_token, user, expires_in }) // Set token, user data, and expires_in
 
       if (keepLoggedIn.value) {
         localStorage.setItem('authToken', access_token) // Optional: persist token

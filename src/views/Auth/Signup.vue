@@ -293,6 +293,7 @@ const passwordConfirmation = ref('')
 const agreeToTerms = ref(false)
 const designations = ref([])
 const selectedDesignation = ref('')
+const showPassword = ref(false)
 
 onMounted(async () => {
   try {
@@ -303,6 +304,10 @@ onMounted(async () => {
     alert('Failed to load designations.')
   }
 })
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value
+}
 
 const handleSubmit = async () => {
   if (!agreeToTerms.value) {

@@ -166,6 +166,17 @@ const router = createRouter({
         title: 'Signup',
       },
     },
+
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: () => import('../views/Auth/ForgotPassword.vue')
+    },
+    {
+      path: '/reset-password',
+      name: 'ResetPassword',
+      component: () => import('../views/Auth/ResetPassword.vue')
+    },
     {
       path: '/user-management/pending-users',
       name: 'Pending User List',
