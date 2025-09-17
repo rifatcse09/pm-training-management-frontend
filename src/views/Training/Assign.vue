@@ -8,6 +8,17 @@
           <form @submit.prevent="assignEmployees" class="text-left">
             <div class="grid grid-cols-1 gap-6">
               <div>
+                <label for="searchEmployee" class="block text-sm font-medium text-gray-700 text-left">Search Employee</label>
+                <input
+                  id="searchEmployee"
+                  v-model="employeeSearchQuery"
+                  type="text"
+                  placeholder="Search by name or email"
+                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                  @input="fetchEmployees"
+                />
+              </div>
+              <div>
                 <label for="training" class="block text-sm font-medium text-gray-700 text-left">Select Training</label>
                 <CustomDropdown
                   :options="filteredTrainings"
@@ -63,44 +74,31 @@
                 />
                 <p v-if="errors.file_link" class="text-red-500 text-sm mt-1">{{ errors.file_link[0] }}</p>
               </div>
+
               <div>
-                <label for="searchEmployee" class="block text-sm font-medium text-gray-700 text-left">Search Employee</label>
-                <input
-                  id="searchEmployee"
-                  v-model="employeeSearchQuery"
-                  type="text"
-                  placeholder="Search by name or email"
-                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                  @input="fetchEmployees"
+                <label for="designation" class="block text-sm font-medium text-gray-700 text-left">Filter by Designation</label>
+                <CustomDropdown
+                  :options="designations"
+                  v-model="selectedDesignation"
+                  :reduce="designation => designation.value"
+                  placeholder="Select designation..."
                 />
               </div>
               <div>
-              
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label for="workingPlace" class="block text-sm font-medium text-gray-700 text-left">Filter by Working Place</label>
-                    <select
-                      id="workingPlace"
-                      v-model="selectedWorkingPlace"
-                      class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
-                      required
-                    >
-                      <option value="" disabled>Select working place</option>
-                      <option v-for="place in workingPlaces" :key="place.id" :value="place.id">
-                        {{ place.name }}
-                      </option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="designation" class="block text-sm font-medium text-gray-700 text-left">Filter by Designation</label>
-                    <CustomDropdown
-                      :options="designations"
-                      v-model="selectedDesignation"
-                      :reduce="designation => designation.value"
-                      placeholder="Select designation..."
-                    />
-                  </div>
-                </div>
+                <label for="workingPlace" class="block text-sm font-medium text-gray-700 text-left">Filter by Working Place</label>
+                <select
+                  id="workingPlace"
+                  v-model="selectedWorkingPlace"
+                  class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left"
+                  required
+                >
+                  <option value="" disabled>Select working place</option>
+                  <option v-for="place in workingPlaces" :key="place.id" :value="place.id">
+                    {{ place.name }}
+                  </option>
+                </select>
+              </div>
+              <div>
                 <table class="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
