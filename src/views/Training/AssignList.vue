@@ -42,8 +42,40 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th v-for="column in columns" :key="column.field" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {{ column.label }}
+                <th
+                  v-for="column in columns"
+                  :key="column.field"
+                  :class="[
+                    'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+                    column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+                  ]"
+                  @click="column.sortable ? handleSort(column.field) : null"
+                >
+                  <div class="flex items-center space-x-1">
+                    <span>{{ column.label }}</span>
+                    <div v-if="column.sortable" class="flex flex-col">
+                      <svg
+                        :class="[
+                          'w-3 h-3',
+                          sortField === column.field && sortOrder === 'asc' ? 'text-blue-500' : 'text-gray-400'
+                        ]"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      </svg>
+                      <svg
+                        :class="[
+                          'w-3 h-3 transform rotate-180',
+                          sortField === column.field && sortOrder === 'desc' ? 'text-blue-500' : 'text-gray-400'
+                        ]"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      </svg>
+                    </div>
+                  </div>
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -82,9 +114,9 @@
             </tbody>
           </table>
         </div>
-        <Pagination 
-          :pagination="pagination" 
-          :changePage="fetchAssignments" 
+        <Pagination
+          :pagination="pagination"
+          :changePage="fetchAssignments"
         />
       </ComponentCard>
     </div>
@@ -104,19 +136,21 @@ import Pagination from '@/components/common/Pagination.vue';
 const currentPageTitle = ref('Training Assignments');
 const { workingPlaces } = useWorkingPlaces();
 const columns = ref([
-  { field: 'training_name', label: 'Training Name' },
-  { field: 'employee_name', label: 'Employee Name' },
-  { field: 'designation_name', label: 'Designation' },
-  { field: 'working_place', label: 'Working Place' },
-  { field: 'organizer_name', label: 'Organizer' },
-  { field: 'start_date', label: 'Start Date' },
-  { field: 'end_date', label: 'End Date' },
-  { field: 'total_days', label: 'Total Days' },
-  { field: 'file_link', label: 'File Link' },
+  { field: 'training_name', label: 'Training Name', sortable: true },
+  { field: 'employee_name', label: 'Employee Name', sortable: true },
+  { field: 'designation_name', label: 'Designation', sortable: true },
+  { field: 'working_place', label: 'Working Place', sortable: true },
+  { field: 'organizer_name', label: 'Organizer', sortable: true },
+  { field: 'start_date', label: 'Start Date', sortable: true },
+  { field: 'end_date', label: 'End Date', sortable: true },
+  { field: 'total_days', label: 'Total Days', sortable: true },
+  { field: 'file_link', label: 'File Link', sortable: false },
 ]);
 
 const assignments = ref([]);
 const searchQuery = ref('');
+const sortField = ref('');
+const sortOrder = ref('asc');
 const pagination = ref({
   current_page: 1,
   last_page: 1,
@@ -130,9 +164,26 @@ const getWorkingPlaceName = (id) => {
   return place ? place.name : "N/A";
 };
 
+const handleSort = (field) => {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField.value = field;
+    sortOrder.value = 'asc';
+  }
+  fetchAssignments(1);
+};
+
 const fetchAssignments = async (page = 1) => {
   try {
-    const response = await api.get('/trainings/assignments', { params: { search: searchQuery.value, page } });
+    const params = {
+      search: searchQuery.value,
+      page,
+      sort_field: sortField.value,
+      sort_order: sortOrder.value
+    };
+
+    const response = await api.get('/trainings/assignments', { params });
     assignments.value = response.data.data || [];
     pagination.value = response.data.meta || {
       current_page: 1,
