@@ -4,12 +4,28 @@
     <div class="space-y-5 sm:space-y-6">
       <ComponentCard title="Training Assignments">
         <div class="flex justify-between items-center mb-4">
-          <router-link
-            to="/training-management/assign"
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Add New Assignment
-          </router-link>
+          <div class="flex space-x-2">
+            <router-link
+              to="/training-management/assign"
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Add New Assignment
+            </router-link>
+            <button
+              @click="exportToPDF"
+              :disabled="isExporting"
+              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2"
+            >
+              <svg v-if="isExporting" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>{{ isExporting ? 'Generating...' : 'Export PDF' }}</span>
+            </button>
+          </div>
           <div class="relative flex items-center w-full max-w-sm">
             <input
               type="text"
@@ -158,6 +174,8 @@ const pagination = ref({
   per_page: 10,
 });
 
+const isExporting = ref(false);
+
 // Function to get the working place name by ID
 const getWorkingPlaceName = (id) => {
   const place = workingPlaces.value.find((place) => place.id == id);
@@ -220,6 +238,62 @@ const confirmDelete = async (id) => {
     } catch (error) {
       console.error('Failed to delete assignment:', error.response?.data || error.message);
     }
+  }
+};
+
+const exportToPDF = async () => {
+  isExporting.value = true;
+  try {
+    const params = {
+      search: searchQuery.value,
+      orderBy: sortField.value,
+      orderDirection: sortOrder.value,
+    };
+
+    const response = await api.get('/training-assignments/pdf', {
+      params,
+      responseType: 'blob'
+    });
+
+    // Check if response is actually a blob (PDF) or error JSON
+    if (response.headers['content-type']?.includes('application/pdf')) {
+      // Handle PDF download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 19).replace(/[T:]/g, '-');
+      link.download = `training-assignments-report-${dateStr}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('PDF exported successfully');
+    } else {
+      // Handle error response
+      const text = await new Response(response.data).text();
+      const errorData = JSON.parse(text);
+      alert(errorData.message || 'Failed to export PDF. Please try again.');
+    }
+  } catch (error) {
+    console.error('Failed to export PDF:', error);
+    if (error.response?.data) {
+      try {
+        const text = await new Response(error.response.data).text();
+        const errorData = JSON.parse(text);
+        alert(errorData.message || 'Failed to export PDF. Please try again.');
+      } catch {
+        alert('Failed to export PDF. Please try again.');
+      }
+    } else {
+      alert('Failed to export PDF. Please try again.');
+    }
+  } finally {
+    isExporting.value = false;
   }
 };
 
