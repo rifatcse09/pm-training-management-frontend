@@ -13,6 +13,11 @@
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profile.name || "N/A" }}</p>
             </div>
 
+             <div>
+              <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Mobile</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profile.mobile || "N/A" }}</p>
+            </div>
+
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Email</p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ profile.email || "N/A" }}</p>
