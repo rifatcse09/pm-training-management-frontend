@@ -45,8 +45,8 @@
       </div>
     </div>
 
-    <!-- Success/Error Messages -->
-    <div v-if="message" class="mb-4 p-4 rounded-md" :class="messageClass">
+    <!-- Error Messages Only (Success handled by parent) -->
+    <div v-if="message && messageType === 'error'" class="mb-4 p-4 rounded-md" :class="messageClass">
       {{ message }}
     </div>
 
@@ -329,18 +329,17 @@ const openModal = () => {
 };
 
 const closeModal = () => {
-  if (!loading.value) {
-    isProfileInfoModal.value = false;
-    form.value = {
-      name: '',
-      email: '',
-      designation_id: '',
-      mobile: '',
-      password: '',
-      password_confirmation: ''
-    };
-    errors.value = {};
-  }
+  isProfileInfoModal.value = false;
+  form.value = {
+    name: '',
+    email: '',
+    designation_id: '',
+    mobile: '',
+    password: '',
+    password_confirmation: ''
+  };
+  errors.value = {};
+  message.value = '';
 };
 
 const saveProfile = async () => {
@@ -364,23 +363,22 @@ const saveProfile = async () => {
 
     // Use api instead of axios with manual token handling
     const response = await api.put('/profile', payload);
+    const userData = response.data.data.resource;
 
-    // Update local profile data
-    localProfile.value = {
-      name: response.data.user.name || '',
-      email: response.data.user.email || '',
-      file_designation: response.data.user.file_designation || '',
-      grade: response.data.user.grade || '',
-      designation_id: response.data.user.designation_id || '',
-      mobile: response.data.user.mobile || '',
-      avatar: response.data.user.avatar || null
+    // Update local profile data with proper structure
+    const updatedProfile = {
+      ...userData,
+      grade: userData.designation?.grade || '',
+      designation: userData.designation || null,
+      designation_id: userData.designation?.id || null
     };
 
-    // Emit update to parent component
-    emit("update:profile", { ...localProfile.value });
+    localProfile.value = updatedProfile;
 
-    showMessage(response.data.message || 'Profile updated successfully', 'success');
-    closeModal();
+    // Emit update to parent component with the complete profile structure
+    emit("update:profile", updatedProfile);
+
+    // Don't show success message here - let parent handle it
 
   } catch (error) {
     if (error.response?.status === 422) {
@@ -392,6 +390,10 @@ const saveProfile = async () => {
     );
   } finally {
     loading.value = false;
+    // Close modal only on success (when there are no errors)
+    if (Object.keys(errors.value).length === 0) {
+      closeModal();
+    }
   }
 };
 
