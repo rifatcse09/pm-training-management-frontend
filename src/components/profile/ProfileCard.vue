@@ -15,13 +15,13 @@
             >
               {{ localProfile.name || "N/A" }}
             </h4>
-            <!-- <div
+            <div
               class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left"
             >
               <p class="text-sm text-gray-500 dark:text-gray-400">{{ localProfile.file_designation || "No designation" }}</p>
-              <span class="hidden w-1 h-1 bg-gray-400 rounded-full xl:block"></span>
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ localProfile.email || "N/A" }}</p>
-            </div> -->
+              <span v-if="localProfile.file_designation && localProfile.grade" class="hidden w-1 h-1 bg-gray-400 rounded-full xl:block"></span>
+              <p v-if="localProfile.grade" class="text-sm text-gray-500 dark:text-gray-400">Grade {{ localProfile.grade }}</p>
+            </div>
           </div>
         </div>
         <button @click="openModal" class="edit-button">
@@ -92,37 +92,31 @@
                 </h5>
 
                 <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <!-- File Designation - Changed from col-span-2 to col-span-2 lg:col-span-1 -->
+                  <!-- File Designation Dropdown -->
                   <div class="col-span-2 lg:col-span-1">
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                      Designation
+                      Designation<span class="text-error-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      v-model="form.file_designation"
+                    <select
+                      v-model="form.designation_id"
+                      :disabled="loadingDesignations"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                      :class="errors.file_designation ? 'border-red-500' : 'border-gray-300'"
-                      placeholder="Enter file designation"
-                    />
-                    <p v-if="errors.file_designation" class="mt-1 text-sm text-red-600">
-                      {{ errors.file_designation[0] }}
-                    </p>
-                  </div>
-
-                  <!-- Mobile Number - Moved up to be beside Designation -->
-                  <div class="col-span-2 lg:col-span-1">
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                      Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      v-model="form.mobile"
-                      class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                      :class="errors.mobile ? 'border-red-500' : 'border-gray-300'"
-                      placeholder="Enter your mobile number"
-                    />
-                    <p v-if="errors.mobile" class="mt-1 text-sm text-red-600">
-                      {{ errors.mobile[0] }}
+                      :class="errors.designation_id ? 'border-red-500' : 'border-gray-300'"
+                    >
+                      <option value="" disabled>
+                        {{ loadingDesignations ? 'Loading designations...' : 'Select your designation' }}
+                      </option>
+                      <option
+                        v-for="designation in designations"
+                        :key="designation.id"
+                        :value="designation.id"
+                        :selected="designation.id == form.designation_id"
+                      >
+                        {{ designation.name + ' ' + designation.grade }}
+                      </option>
+                    </select>
+                    <p v-if="errors.designation_id" class="mt-1 text-sm text-red-600">
+                      {{ errors.designation_id[0] }}
                     </p>
                   </div>
 
@@ -141,6 +135,23 @@
                     />
                     <p v-if="errors.name" class="mt-1 text-sm text-red-600">
                       {{ errors.name[0] }}
+                    </p>
+                  </div>
+
+                  <!-- Mobile Number -->
+                  <div class="col-span-2 lg:col-span-1">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                      Mobile Number
+                    </label>
+                    <input
+                      type="tel"
+                      v-model="form.mobile"
+                      class="dark:bg-dark-900 h-11 w-full rounded-lg border bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                      :class="errors.mobile ? 'border-red-500' : 'border-gray-300'"
+                      placeholder="Enter your mobile number"
+                    />
+                    <p v-if="errors.mobile" class="mt-1 text-sm text-red-600">
+                      {{ errors.mobile[0] }}
                     </p>
                   </div>
 
@@ -223,8 +234,8 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
-import axios from "axios";
+import { ref, watch, computed, onMounted } from "vue";
+import api from '@/composables/useApi'; // Import api like in Signup
 import Modal from "./Modal.vue";
 
 const props = defineProps({
@@ -235,6 +246,8 @@ const props = defineProps({
       name: "N/A",
       email: "N/A",
       file_designation: "",
+      grade: "",
+      designation_id: "",
       mobile: "",
       avatar: null,
     }),
@@ -255,7 +268,7 @@ const localProfile = ref({ ...props.profile });
 const form = ref({
   name: '',
   email: '',
-  file_designation: '',
+  designation_id: '',
   mobile: '',
   password: '',
   password_confirmation: ''
@@ -278,12 +291,33 @@ const messageClass = computed(() => {
     : 'bg-red-100 border border-red-400 text-red-700'
 });
 
+// Add designations data
+const designations = ref([]);
+const loadingDesignations = ref(false);
+
+// Fetch designations from API - Updated to match Signup pattern
+onMounted(async () => {
+  loadingDesignations.value = true;
+  try {
+    const response = await api.get('/designations');
+    designations.value = response.data.data;
+  } catch (error) {
+    console.error('Failed to fetch designations:', error.response?.data || error.message);
+    // You could show a toast notification instead of alert
+    console.warn('Failed to load designations.');
+  } finally {
+    loadingDesignations.value = false;
+  }
+});
+
+// Remove the separate fetchDesignations function since it's now in onMounted
+
 const openModal = () => {
   // Initialize form with current data from props
   form.value = {
     name: localProfile.value.name || '',
     email: localProfile.value.email || '',
-    file_designation: localProfile.value.file_designation || '',
+    designation_id: localProfile.value.designation.id || '',
     mobile: localProfile.value.mobile || '',
     password: '',
     password_confirmation: ''
@@ -300,7 +334,7 @@ const closeModal = () => {
     form.value = {
       name: '',
       email: '',
-      file_designation: '',
+      designation_id: '',
       mobile: '',
       password: '',
       password_confirmation: ''
@@ -315,11 +349,10 @@ const saveProfile = async () => {
   message.value = '';
 
   try {
-    const token = localStorage.getItem('token');
     const payload = {
       name: form.value.name,
       email: form.value.email,
-      file_designation: form.value.file_designation,
+      designation_id: form.value.designation_id,
       mobile: form.value.mobile
     };
 
@@ -329,18 +362,16 @@ const saveProfile = async () => {
       payload.password_confirmation = form.value.password_confirmation;
     }
 
-    const response = await axios.put('/api/v1/profile', payload, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // Use api instead of axios with manual token handling
+    const response = await api.put('/profile', payload);
 
     // Update local profile data
     localProfile.value = {
       name: response.data.user.name || '',
       email: response.data.user.email || '',
       file_designation: response.data.user.file_designation || '',
+      grade: response.data.user.grade || '',
+      designation_id: response.data.user.designation_id || '',
       mobile: response.data.user.mobile || '',
       avatar: response.data.user.avatar || null
     };
