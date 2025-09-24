@@ -275,7 +275,12 @@ const email = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
 const agreeToTerms = ref(false)
-const designations = ref([])
+interface Designation {
+  id: number | string
+  name: string
+  grade: string
+}
+const designations = ref<Designation[]>([])
 const selectedDesignation = ref('')
 const showPassword = ref(false)
 
