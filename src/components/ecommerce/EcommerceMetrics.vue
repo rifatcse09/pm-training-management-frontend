@@ -1,5 +1,22 @@
 <template>
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
+  <div v-if="loading" class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
+    <div v-for="i in 3" :key="i" class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div class="animate-pulse">
+        <div class="w-12 h-12 bg-gray-200 rounded-xl dark:bg-gray-700"></div>
+        <div class="mt-5">
+          <div class="h-4 bg-gray-200 rounded dark:bg-gray-700 w-20"></div>
+          <div class="h-6 bg-gray-200 rounded dark:bg-gray-700 w-16 mt-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
+    <!-- Debug info -->
+    <!-- <div class="col-span-full text-xs text-gray-500 mb-2">
+      Debug: {{ JSON.stringify(stats) }}
+    </div> -->
+
     <div
       class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"
     >
@@ -26,7 +43,9 @@
       <div class="flex items-end justify-between mt-5">
         <div>
           <span class="text-sm text-gray-500 dark:text-gray-400">মোট প্রশিক্ষণ</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">6,796</h4>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+            {{ stats.data?.total_trainings_this_year || 0 }}
+          </h4>
         </div>
       </div>
     </div>
@@ -57,7 +76,9 @@
       <div class="flex items-end justify-between mt-5">
         <div>
           <span class="text-sm text-gray-500 dark:text-gray-400">স্থানীয় প্রশিক্ষণ</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">5,605</h4>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+            {{ stats.data?.local_trainings || 0 }}
+          </h4>
         </div>
       </div>
     </div>
@@ -88,9 +109,25 @@
       <div class="flex items-end justify-between mt-5">
         <div>
           <span class="text-sm text-gray-500 dark:text-gray-400">বৈদেশিক প্রশিক্ষণ</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">1,191</h4>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+            {{ stats.data?.remote_trainings || 0 }}
+          </h4>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { defineProps } from "vue";
+defineProps({
+  stats: {
+    type: Object,
+    default: () => ({})
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  }
+});
+</script>
