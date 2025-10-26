@@ -88,7 +88,7 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
-import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
+import CustomDropdown from "@/components/forms/FormElements/CustomDropdownEmp.vue";
 import debounce from "lodash.debounce";
 import api from '@/composables/useApi'
 
@@ -204,22 +204,22 @@ const fetchEmployees = async (query = "", page = 1, append = false) => {
     console.log("Already loading, skipping request");
     return;
   }
-  
+
   employeeLoading.value = true;
   console.log(`Fetching employees - Query: "${query}", Page: ${page}, Append: ${append}`);
-  
+
   try {
-    const response = await api.get("/employees", { 
-      params: { 
-        search: query, 
+    const response = await api.get("/employees", {
+      params: {
+        search: query,
         page,
-        per_page: pagination.value.per_page 
-      } 
+        per_page: pagination.value.per_page
+      }
     });
-    
+
     console.log("API Response:", response.data);
     const data = response.data;
-    
+
     const newEmployees = data.data.map((employee) => ({
       value: employee.id,
       label: `${employee.name} (Grade: ${employee.grade || employee.designation_name || 'N/A'})`,
@@ -237,7 +237,7 @@ const fetchEmployees = async (query = "", page = 1, append = false) => {
       employees.value = newEmployees;
       console.log(`Loaded ${newEmployees.length} employees`);
     }
-    
+
     // Update pagination from response - handle both data structure formats
     const paginationData = data.meta || data;
     pagination.value = {
@@ -246,11 +246,11 @@ const fetchEmployees = async (query = "", page = 1, append = false) => {
       per_page: paginationData.per_page || pagination.value.per_page,
       total: paginationData.total || 0,
     };
-    
+
     filteredEmployees.value = employees.value;
     console.log("Updated pagination:", pagination.value);
     console.log("Total employees loaded:", employees.value.length);
-    
+
   } catch (error) {
     console.error("Failed to fetch employees:", error.response?.data || error.message);
     if (!append) {
@@ -278,7 +278,7 @@ const getGradeQueryBySubjectId = (subjectId) => {
     11: "grade-17-20",
     12: "grade-17-20"  // ১৭-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন
   };
-  
+
   return gradeMapping[subjectId] || "";
 };
 
@@ -290,10 +290,10 @@ const debouncedFetchEmployees = debounce((query) => {
 
 const handleEmployeeSearch = (query) => {
   employeeSearchQuery.value = query;
-  
+
   // Get grade-based query from selected subject
   const gradeQuery = getGradeQueryBySubjectId(filters.value.subject);
-  
+
   // Combine user search with grade filter
   let finalQuery = query.trim();
   if (gradeQuery && finalQuery) {
@@ -303,9 +303,9 @@ const handleEmployeeSearch = (query) => {
     // If only grade filter exists, use it
     finalQuery = gradeQuery;
   }
-  
+
   console.log(`Employee search - User query: "${query}", Grade query: "${gradeQuery}", Final query: "${finalQuery}"`);
-  
+
   if (finalQuery === "") {
     // If no query, load initial employees
     pagination.value.current_page = 1;
@@ -322,28 +322,28 @@ const loadMoreEmployees = async () => {
   console.log("Last page:", pagination.value.last_page);
   console.log("Employee loading:", employeeLoading.value);
   console.log("Current employees count:", employees.value.length);
-  
+
   if (employeeLoading.value) {
     console.log("Already loading, aborting");
     return;
   }
-  
+
   if (pagination.value.current_page >= pagination.value.last_page) {
     console.log("No more pages to load");
     return;
   }
-  
+
   const nextPage = pagination.value.current_page + 1;
   console.log("Loading page:", nextPage);
-  
+
   // Get current query for pagination
   const gradeQuery = getGradeQueryBySubjectId(filters.value.subject);
   let currentQuery = employeeSearchQuery.value.trim();
-  
+
   if (gradeQuery && !currentQuery) {
     currentQuery = gradeQuery;
   }
-  
+
   try {
     await fetchEmployees(currentQuery, nextPage, true);
     console.log("Successfully loaded more employees");
@@ -357,19 +357,19 @@ watch(
   () => filters.value.subject,
   (newSubjectId) => {
     console.log(`Subject changed to: ${newSubjectId}`);
-    
+
     // Reset employee selection when subject changes
     filters.value.employee_id = null;
-    
+
     // Get grade query for the new subject
     const gradeQuery = getGradeQueryBySubjectId(newSubjectId);
-    
+
     if (gradeQuery) {
       console.log(`Loading employees for grade: ${gradeQuery}`);
       // Reset pagination and search query
       pagination.value.current_page = 1;
       employeeSearchQuery.value = "";
-      
+
       // Fetch employees with grade filter
       fetchEmployees(gradeQuery, 1, false);
     } else {
@@ -377,7 +377,7 @@ watch(
       // Reset pagination and search query
       pagination.value.current_page = 1;
       employeeSearchQuery.value = "";
-      
+
       // Fetch all employees
       fetchEmployees("", 1, false);
     }
