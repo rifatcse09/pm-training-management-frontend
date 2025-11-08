@@ -20,7 +20,6 @@ const columns = [
   { label: "Email", field: "email" },
   { label: "Designation", field: "designation" },
   { label: "Class", field: "class" },
-  { label: "Grade", field: "grade" },
   { label: "Role", field: "role" },
 ];
 </script>

@@ -86,7 +86,7 @@ const fetchPendingUsers = async () => {
 
     pendingUsers.value = extractData(response).map(user => ({
       ...user,
-      designation: user.designation.name|| "N/A", // Ensure 'designation' is mapped correctly
+      designation: user.designation?.name ? `${user.designation.name} - Grade ${user.designation.grade}` : "N/A",
       class: user.designation.class || "N/A", // Ensure 'class' is mapped correctly
       grade: user.designation.grade || "N/A", // Ensure 'grade' is mapped correctly
     }));
