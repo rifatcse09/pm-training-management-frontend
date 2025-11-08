@@ -6,6 +6,8 @@
         <ComponentCard title="Training Report" class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
           <form @submit.prevent="generateReport" class="text-left">
             <div class="grid grid-cols-1 gap-6">
+
+              <!-- Report Subject Selection: Choose the type of training report to generate -->
               <div>
                 <label for="subject" class="block text-sm font-medium text-gray-700 text-left">Subject</label>
                 <select
@@ -20,6 +22,22 @@
                   </option>
                 </select>
               </div>
+
+              <!-- Conditional Training Selection: Only shown for specific subject-based reports (3,6,9,12) -->
+              <div v-if="showTrainingDropdown">
+                <label for="training" class="block text-sm font-medium text-gray-700 text-left">Select Training</label>
+                <CustomDropdown
+                  :options="filteredTrainings"
+                  v-model="filters.training_id"
+                  :reduce="training => training.value"
+                  :fetchMore="loadMoreTrainings"
+                  :loading="trainingLoading"
+                  @search="handleTrainingSearch"
+                  placeholder="Search and select training..."
+                />
+              </div>
+
+              <!-- Fiscal Year Selection: Choose multiple fiscal years for report filtering -->
               <div>
                 <label for="fiscalYear" class="block text-sm font-medium text-gray-700 text-left">Fiscal Year</label>
                 <MultipleSelect
@@ -30,6 +48,8 @@
                   placeholder="Select fiscal years..."
                 />
               </div>
+
+              <!-- Employee Selection: Choose specific employee for individual reports -->
               <div>
                 <label for="employee" class="block text-sm font-medium text-gray-700 text-left">Employee</label>
                 <CustomDropdown
@@ -42,7 +62,10 @@
                   placeholder="Search and select employee..."
                 />
               </div>
+
+              <!-- Date Range Selection: Define the period for training data in the report -->
               <div class="grid grid-cols-2 gap-4">
+                <!-- Report Start Date: Beginning of the reporting period -->
                 <div>
                   <label for="start_date" class="block text-sm font-medium text-gray-700 text-left">Start Date</label>
                   <flat-pickr
@@ -52,6 +75,7 @@
                     placeholder="Select start date"
                   />
                 </div>
+                <!-- Report End Date: End of the reporting period -->
                 <div>
                   <label for="end_date" class="block text-sm font-medium text-gray-700 text-left">End Date</label>
                   <flat-pickr
@@ -63,6 +87,8 @@
                 </div>
               </div>
             </div>
+
+            <!-- Report Generation Button: Process filters and generate PDF report -->
             <div class="mt-6 flex justify-start">
               <button
                 type="submit"
@@ -88,7 +114,7 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
-import CustomDropdown from "@/components/forms/FormElements/CustomDropdownEmp.vue";
+import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
 import debounce from "lodash.debounce";
 import api from '@/composables/useApi'
 
@@ -98,7 +124,8 @@ const filters = ref({
   fiscalYears: [],
   startDate: "",
   endDate: "",
-  employee_id: null, // Add employee property to filters
+  employee_id: null,
+  training_id: null, // Add training_id to filters
 });
 
 const subjects = ref([
@@ -115,10 +142,6 @@ const subjects = ref([
   { id: 11, name: "১৭-২০তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
   { id: 12, name: "১৭-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
   { id: 13, name: "প্রকল্প অনুসারে মোট প্রশিক্ষনের প্রতিবেদন" }
-  // { id: 1, name: "কর্মচারী/কর্মকর্তা ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
-  // { id: 2, name: "একক কর্মচারী/কর্মকর্তার বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
-  // { id: 3, name: "প্রকল্প অনুসারে মোট প্রশিক্ষনের প্রতিবেদন" },
-  // { id: 4, name: "৬০ ঘন্টা ১১ তম গ্রেডের কর্মচারীদের বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
 ]);
 
 // Generate recent past and present fiscal years dynamically
@@ -151,20 +174,113 @@ const flatpickrConfig = {
 
 const loading = ref(false);
 const employeeLoading = ref(false);
+const trainingLoading = ref(false); // Add training loading state
+
+// Training-related reactive variables
+const trainings = ref([]);
+const filteredTrainings = ref([]);
+const trainingSearchQuery = ref("");
+const trainingPagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+});
+
+// Computed property to show training dropdown conditionally
+const showTrainingDropdown = computed(() => {
+  return [3, 6, 9, 12].includes(filters.value.subject);
+});
+
+// Training fetching functions
+const fetchTrainings = async (query = "", page = 1, append = false) => {
+  if (trainingLoading.value && append) return;
+
+  trainingLoading.value = true;
+  try {
+    const response = await api.get("/trainings", {
+      params: {
+        search: query,
+        page,
+        per_page: trainingPagination.value.per_page
+      }
+    });
+
+    const data = response.data;
+    const newTrainings = data.data.map((training) => ({
+      value: training.id,
+      label: training.name,
+    }));
+
+    if (append) {
+      trainings.value = [...trainings.value, ...newTrainings];
+    } else {
+      trainings.value = newTrainings;
+    }
+
+    const paginationData = data.meta || data;
+    trainingPagination.value = {
+      current_page: paginationData.current_page || page,
+      last_page: paginationData.last_page || 1,
+      per_page: paginationData.per_page || trainingPagination.value.per_page,
+      total: paginationData.total || 0,
+    };
+
+    filteredTrainings.value = trainings.value;
+  } catch (error) {
+    console.error("Failed to fetch trainings:", error.response?.data || error.message);
+    if (!append) {
+      trainings.value = [];
+      filteredTrainings.value = [];
+    }
+  } finally {
+    trainingLoading.value = false;
+  }
+};
+
+const debouncedFetchTrainings = debounce((query) => {
+  trainingPagination.value.current_page = 1;
+  fetchTrainings(query, 1, false);
+}, 300);
+
+const handleTrainingSearch = (query) => {
+  trainingSearchQuery.value = query;
+  if (query.trim() === "") {
+    trainingPagination.value.current_page = 1;
+    fetchTrainings("", 1, false);
+  } else {
+    debouncedFetchTrainings(query);
+  }
+};
+
+const loadMoreTrainings = async () => {
+  if (trainingLoading.value) return;
+  if (trainingPagination.value.current_page >= trainingPagination.value.last_page) return;
+
+  const nextPage = trainingPagination.value.current_page + 1;
+  await fetchTrainings(trainingSearchQuery.value, nextPage, true);
+};
 
 const generateReport = async () => {
   loading.value = true;
   try {
+    const params = {
+      subject: filters.value.subject,
+      fiscal_years: [...new Set(filters.value.fiscalYears.map(fy => fy.value))],
+      start_date: filters.value.startDate,
+      end_date: filters.value.endDate,
+      employee_id: filters.value.employee_id,
+    };
+
+    // Include training_id only for subjects 3, 6, 9, and 12
+    if ([3, 6, 9, 12].includes(filters.value.subject) && filters.value.training_id) {
+      params.training_id = filters.value.training_id;
+    }
+
     const response = await api.get('/training-reports', {
-      params: {
-        subject: filters.value.subject,
-        fiscal_years: [...new Set(filters.value.fiscalYears.map(fy => fy.value))],
-        start_date: filters.value.startDate,
-        end_date: filters.value.endDate,
-        employee_id: filters.value.employee_id,
-      },
+      params,
       headers: { 'Accept': 'application/pdf' },
-      responseType: 'blob', // Ensure the response is treated as a binary file
+      responseType: 'blob',
     });
 
     // Extract filename from Content-Disposition header
@@ -182,7 +298,7 @@ const generateReport = async () => {
     document.body.removeChild(link);
   } catch (err) {
     const errorMessage = err.response?.data?.message || "Failed to generate report.";
-    alert(`${errorMessage}`); // Show user-friendly error message
+    alert(`${errorMessage}`);
   } finally {
     loading.value = false;
   }
@@ -361,6 +477,16 @@ watch(
     // Reset employee selection when subject changes
     filters.value.employee_id = null;
 
+    // Reset training selection when subject changes
+    filters.value.training_id = null;
+
+    // Fetch trainings if training dropdown should be shown
+    if (showTrainingDropdown.value) {
+      trainingPagination.value.current_page = 1;
+      trainingSearchQuery.value = "";
+      fetchTrainings("", 1, false);
+    }
+
     // Get grade query for the new subject
     const gradeQuery = getGradeQueryBySubjectId(newSubjectId);
 
@@ -384,5 +510,11 @@ watch(
   }
 );
 
-onMounted(() => fetchEmployees());
+onMounted(() => {
+  fetchEmployees();
+  // Fetch trainings on mount if needed
+  if (showTrainingDropdown.value) {
+    fetchTrainings();
+  }
+});
 </script>
