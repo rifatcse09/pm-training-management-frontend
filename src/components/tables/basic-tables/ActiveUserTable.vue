@@ -11,6 +11,9 @@
           >
             {{ column.label }}
           </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Status
+          </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
@@ -20,6 +23,16 @@
           <td class="px-6 py-4 whitespace-nowrap">{{ user.designation || "N/A" }}</td>
           <td class="px-6 py-4 whitespace-nowrap">{{ user.class || "N/A" }}</td>
           <td class="px-6 py-4 whitespace-nowrap">{{ user.grade || "N/A" }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+              {{ user.role || "No Role" }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+              Active
+            </span>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -47,11 +60,13 @@ setupApiInterceptors(authStore);
 const fetchActiveUsers = async () => {
   try {
     const response = await api.get("/admin/users");
+    console.log("Fetched active users:", response.data);
+
     activeUsers.value = extractData(response).map(user => ({
       ...user,
-      designation: user.designation.name || "N/A",
-      class: user.designation.class || "N/A",
-      grade: user.designation.grade || "N/A",
+      designation: user.designation?.name || "N/A",
+      class: user.designation?.class || "N/A",
+      grade: user.designation?.grade || "N/A",
     }));
   } catch (error) {
     console.error("Error fetching active users:", error);
