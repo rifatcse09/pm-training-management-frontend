@@ -98,12 +98,22 @@
                 Active
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
               <button
                 @click="editUser(user)"
                 class="text-indigo-600 hover:text-indigo-900"
               >
                 Edit
+              </button>
+              <button
+                v-if="canDelete"
+                @click="confirmDelete(user.id)"
+                class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 flex items-center space-x-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Delete</span>
               </button>
             </td>
           </template>
@@ -118,6 +128,7 @@ import { ref, onMounted } from "vue";
 import api, { setupApiInterceptors } from "@/composables/useApi";
 import { useAuthStore } from "@/stores/auth";
 import { extractData } from "@/utils/apiResponseHandler";
+import { usePermissions } from "@/composables/usePermissions";
 
 const props = defineProps({
   columns: {
@@ -144,6 +155,8 @@ const roles = [
   { id: 2, name: "Officer" },
   { id: 3, name: "Operator" }
 ];
+
+const { canDelete } = usePermissions();
 
 setupApiInterceptors(authStore);
 
@@ -228,6 +241,20 @@ const cancelEdit = () => {
     // grade: "",
     role_id: ""
   };
+};
+
+const confirmDelete = async (id) => {
+  if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+  try {
+    await api.delete(`/admin/users/${id}`);
+    alert('User deleted successfully!');
+    // Remove the deleted user from the list without reloading the page
+    activeUsers.value = activeUsers.value.filter(user => user.id !== id);
+  } catch (error) {
+    console.error('Failed to delete user:', error.response?.data || error.message);
+    alert('Failed to delete user. Please try again.');
+  }
 };
 
 onMounted(() => {
