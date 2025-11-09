@@ -49,8 +49,8 @@
                 />
               </div>
 
-              <!-- Employee Selection: Choose specific employee for individual reports -->
-              <div>
+              <!-- Employee Selection: Choose specific employee for individual reports - Only for subjects 2,5,8,11 -->
+              <div v-if="showEmployeeDropdown">
                 <label for="employee" class="block text-sm font-medium text-gray-700 text-left">Employee</label>
                 <CustomDropdown
                   :options="filteredEmployees"
@@ -185,6 +185,11 @@ const trainingPagination = ref({
   last_page: 1,
   per_page: 10,
   total: 0,
+});
+
+// Computed property to show employee dropdown conditionally
+const showEmployeeDropdown = computed(() => {
+  return [2, 5, 8, 11].includes(filters.value.subject);
 });
 
 // Computed property to show training dropdown conditionally
@@ -487,25 +492,28 @@ watch(
       fetchTrainings("", 1, false);
     }
 
-    // Get grade query for the new subject
-    const gradeQuery = getGradeQueryBySubjectId(newSubjectId);
+    // Only fetch employees if employee dropdown should be shown
+    if (showEmployeeDropdown.value) {
+      // Get grade query for the new subject
+      const gradeQuery = getGradeQueryBySubjectId(newSubjectId);
 
-    if (gradeQuery) {
-      console.log(`Loading employees for grade: ${gradeQuery}`);
-      // Reset pagination and search query
-      pagination.value.current_page = 1;
-      employeeSearchQuery.value = "";
+      if (gradeQuery) {
+        console.log(`Loading employees for grade: ${gradeQuery}`);
+        // Reset pagination and search query
+        pagination.value.current_page = 1;
+        employeeSearchQuery.value = "";
 
-      // Fetch employees with grade filter
-      fetchEmployees(gradeQuery, 1, false);
-    } else {
-      console.log("No grade filter for this subject, loading all employees");
-      // Reset pagination and search query
-      pagination.value.current_page = 1;
-      employeeSearchQuery.value = "";
+        // Fetch employees with grade filter
+        fetchEmployees(gradeQuery, 1, false);
+      } else {
+        console.log("No grade filter for this subject, loading all employees");
+        // Reset pagination and search query
+        pagination.value.current_page = 1;
+        employeeSearchQuery.value = "";
 
-      // Fetch all employees
-      fetchEmployees("", 1, false);
+        // Fetch all employees
+        fetchEmployees("", 1, false);
+      }
     }
   }
 );
