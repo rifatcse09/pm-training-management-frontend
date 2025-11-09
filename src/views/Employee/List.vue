@@ -5,6 +5,7 @@
       <ComponentCard title="Employee List">
         <div class="flex justify-between items-center mb-4">
           <router-link
+            v-if="canCreate"
             to="/employee-management/add"
             class="bg-blue-500 text-white px-4 py-2 rounded"
           >
@@ -57,12 +58,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <router-link
+                    v-if="canCreate"
                     :to="`/employee-management/edit/${employee.id}`"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                   >
                     Edit
                   </router-link>
                   <button
+                    v-if="canDelete"
                     @click="confirmDelete(employee.id)"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                   >
@@ -88,6 +91,7 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import { usePermissions } from '@/composables/usePermissions'
 
 const currentPageTitle = ref("Employee List");
 const columns = ref([
@@ -109,6 +113,7 @@ const pagination = ref({
 });
 
 const { workingPlaces } = useWorkingPlaces(); // Use the composable to get workingPlaces
+const { canCreate, canDelete } = usePermissions()
 
 // Function to get the working place name by ID
 const getWorkingPlaceName = (id) => {

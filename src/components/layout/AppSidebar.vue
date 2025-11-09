@@ -34,7 +34,7 @@
     >
       <nav class="mb-6">
         <div class="flex flex-col gap-4">
-          <div v-for="(menuGroup, groupIndex) in menuGroups" :key="groupIndex">
+          <div v-for="(menuGroup, groupIndex) in filteredMenuGroups" :key="groupIndex">
             <h2
               :class="[
                 'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
@@ -130,7 +130,7 @@
                     "
                   >
                     <ul class="mt-2 space-y-1 ml-9">
-                      <li v-for="subItem in item.subItems" :key="subItem.name">
+                      <li v-for="subItem in getFilteredSubItems(item.subItems)" :key="subItem.name">
                         <router-link
                           :to="subItem.path"
                           :class="[
@@ -198,6 +198,7 @@
 <script setup>
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import { usePermissions } from "@/composables/usePermissions";
 
 import {
   GridIcon,
@@ -212,6 +213,7 @@ import SidebarWidget from "./SidebarWidget.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
+const { hasPermission } = usePermissions();
 
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
@@ -222,38 +224,43 @@ const menuGroups = [
       {
         icon: GridIcon,
         name: "Dashboard",
-        path: "/dashboard", // Updated to a main item with /dashboard path
+        path: "/dashboard",
+        roles: ["admin", "operator", "officer"],
       },
       {
         icon: BookOpenIcon,
         name: "Training Management",
+        roles: ["admin", "operator", "officer"],
         subItems: [
-          { name: "List Trainings", path: "/training-management/list", pro: false },
-          { name: "Add Employees in Training", path: "/training-management/assign", pro: false },
-          { name: "Employee Wise Trainings", path: "/training-management/assign-list", pro: false },
+          { name: "List Trainings", path: "/training-management/list", roles: ["admin", "operator", "officer"] },
+          { name: "Add Employees in Training", path: "/training-management/assign", roles: ["admin", "operator"] },
+          { name: "Employee Wise Trainings", path: "/training-management/assign-list", roles: ["admin", "operator", "officer"] },
         ],
       },
       {
         icon: UserCircleIcon,
         name: "Employee Management",
+        roles: ["admin", "operator", "officer"],
         subItems: [
-          { name: "List Employees", path: "/employee-management/list", pro: false },
-          { name: "Add Employee", path: "/employee-management/add", pro: false },
+          { name: "List Employees", path: "/employee-management/list", roles: ["admin", "operator", "officer"] },
+          { name: "Add Employee", path: "/employee-management/add", roles: ["admin", "operator"] },
         ],
       },
       {
         icon: BriefcaseIcon,
         name: "Organizer Management",
+        roles: ["admin", "operator", "officer"],
         subItems: [
-          { name: "List Organizers", path: "/organizer-management/list", pro: false },
-          { name: "Add Organizer", path: "/organizer-management/add", pro: false },
+          { name: "List Organizers", path: "/organizer-management/list", roles: ["admin", "operator", "officer"] },
+          { name: "Add Organizer", path: "/organizer-management/add", roles: ["admin", "operator"] },
         ],
       },
       {
         icon: CalenderIcon,
         name: "Report Management",
+        roles: ["admin", "operator", "officer"],
         subItems: [
-          { name: "Training Report", path: "/report-management/training-report", pro: false },
+          { name: "Training Report", path: "/report-management/training-report", roles: ["admin", "operator", "officer"] },
         ],
       },
     ],
@@ -264,15 +271,42 @@ const menuGroups = [
       {
         icon: UserCircleIcon,
         name: "User Management",
+        roles: ["admin"],
         subItems: [
-          { name: "Pending User List", path: "/user-management/pending-users", pro: false },
-          { name: "Active User List", path: "/user-management/active-users", pro: false },
+          { name: "Pending User List", path: "/user-management/pending-users", roles: ["admin"] },
+          { name: "Active User List", path: "/user-management/active-users", roles: ["admin"] },
         ],
       },
-
     ],
   },
 ];
+
+const filteredMenuGroups = computed(() => {
+  return menuGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if (item.roles && !hasPermission(item.roles)) {
+          return false;
+        }
+        // If item has subItems, check if any subItem is accessible
+        if (item.subItems) {
+          const accessibleSubItems = item.subItems.filter(subItem => 
+            !subItem.roles || hasPermission(subItem.roles)
+          );
+          return accessibleSubItems.length > 0;
+        }
+        return true;
+      })
+    }))
+    .filter(group => group.items.length > 0);
+});
+
+const getFilteredSubItems = (subItems) => {
+  return subItems?.filter(subItem => 
+    !subItem.roles || hasPermission(subItem.roles)
+  ) || [];
+};
 
 const isActive = (path) => route.path === path;
 

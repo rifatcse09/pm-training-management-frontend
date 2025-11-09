@@ -6,6 +6,7 @@
         <div class="flex justify-between items-center mb-4">
           <div class="flex space-x-2">
             <router-link
+              v-if="canCreate"
               to="/training-management/assign"
               class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
@@ -120,6 +121,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <button
+                    v-if="canDelete"
                     @click="confirmDelete(assignment.id)"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
                   >
@@ -144,6 +146,7 @@ import { ref, onMounted } from 'vue';
 import debounce from 'lodash.debounce';
 import api from '@/composables/useApi';
 import { useWorkingPlaces } from "@/composables/useWorkingPlaces";
+import { usePermissions } from '@/composables/usePermissions';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import ComponentCard from '@/components/common/ComponentCard.vue';
@@ -151,6 +154,7 @@ import Pagination from '@/components/common/Pagination.vue';
 
 const currentPageTitle = ref('Training Assignments');
 const { workingPlaces } = useWorkingPlaces();
+const { canCreate, canDelete } = usePermissions();
 const columns = ref([
   { field: 'training_name', label: 'Training Name', sortable: true },
   { field: 'employee_name', label: 'Employee Name', sortable: true },

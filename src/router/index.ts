@@ -19,6 +19,7 @@ const router = createRouter({
       meta: {
         title: 'Training Management Dashboard',
         requiresAuth: true,
+        roles: ['admin', 'operator', 'officer'],
       },
     },
     {
@@ -184,6 +185,7 @@ const router = createRouter({
       meta: {
         title: 'Pending User List',
         requiresAuth: true,
+        roles: ['admin'],
       },
     },
     {
@@ -193,6 +195,7 @@ const router = createRouter({
       meta: {
         title: 'Active User List',
         requiresAuth: true,
+        roles: ['admin'],
       },
     },
     {
@@ -202,6 +205,7 @@ const router = createRouter({
       meta: {
         title: 'Employee List',
         requiresAuth: true,
+        roles: ['admin', 'operator', 'officer'],
       },
     },
     {
@@ -211,6 +215,7 @@ const router = createRouter({
       meta: {
         title: 'Add Employee',
         requiresAuth: true,
+        roles: ['admin', 'operator'],
       },
     },
     {
@@ -285,9 +290,9 @@ const router = createRouter({
       component: () => import('@/views/Training/Assign.vue'),
       meta: {
         title: 'Employee assign in Training',
-        requiresAuth: true
+        requiresAuth: true,
+        roles: ['admin', 'operator'],
       },
-
     },
     {
       path: '/training-management/assign-list',
@@ -316,9 +321,20 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth && !isLoggedIn) {
     next('/')
-  } else {
-    next()
+    return
   }
+
+  // Check role-based access
+  if (to.meta.roles && authStore.user) {
+    const hasRequiredRole = authStore.hasRole(to.meta.roles as string[])
+    if (!hasRequiredRole) {
+      // Redirect to dashboard or show 403 error
+      next('/dashboard')
+      return
+    }
+  }
+
+  next()
 })
 
 router.beforeEach((to, from, next) => {

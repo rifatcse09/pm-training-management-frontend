@@ -23,6 +23,7 @@
             </button>
           </div>
           <router-link
+            v-if="canCreate"
             to="/training-management/add"
             class="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
           >
@@ -72,12 +73,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <router-link
+                    v-if="canCreate"
                     :to="`/training-management/edit/${training.id}`"
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200"
                   >
                     Edit
                   </router-link>
                   <button
+                    v-if="canDelete"
                     @click="confirmDelete(training.id)"
                     class="ml-2 inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-100 rounded hover:bg-red-200"
                   >
@@ -110,6 +113,9 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import ComponentCard from '@/components/common/ComponentCard.vue';
 import Pagination from '@/components/common/Pagination.vue';
+import { usePermissions } from '@/composables/usePermissions'
+
+const { canCreate, canDelete } = usePermissions()
 
 const currentPageTitle = ref('Training Management');
 const trainings = ref([]);

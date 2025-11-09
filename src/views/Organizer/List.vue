@@ -3,31 +3,33 @@
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
       <ComponentCard title="Organizer List">
-        <div class="flex justify-between items-center mb-4">
-          <router-link
-            to="/organizer-management/add"
-            class="bg-blue-500 text-white px-4 py-2 rounded"
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold">Organizer List</h1>
+          <router-link 
+            v-if="canCreate"
+            to="/organizer-management/add" 
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Add New Organizer
+            Add Organizer
           </router-link>
-          <div class="relative flex items-center">
-            <input
-              type="text"
-              v-model="searchQuery"
-              @keyup.enter="searchOrganizers"
-              @input="handleSearchInput"
-              placeholder="Search organizers..."
-              class="border border-gray-300 rounded px-4 py-2 text-sm w-64"
-            />
-            <button
-              @click="clearSearch"
-              class="absolute right-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+        </div>
+        <div class="relative flex items-center">
+          <input
+            type="text"
+            v-model="searchQuery"
+            @keyup.enter="searchOrganizers"
+            @input="handleSearchInput"
+            placeholder="Search organizers..."
+            class="border border-gray-300 rounded px-4 py-2 text-sm w-64"
+          />
+          <button
+            @click="clearSearch"
+            class="absolute right-2 text-gray-500 hover:text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -53,12 +55,14 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ organizer.is_project ? "Yes" : "No" }}</td>
                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                   <router-link
+                    v-if="canCreate"
                     :to="`/organizer-management/edit/${organizer.id}`"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                   >
                     Edit
                   </router-link>
                   <button
+                    v-if="canDelete"
                     @click="confirmDelete(organizer.id)"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                   >
@@ -83,6 +87,9 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import Pagination from "@/components/common/Pagination.vue";
+import { usePermissions } from '@/composables/usePermissions'
+
+const { canCreate, canDelete } = usePermissions()
 
 const currentPageTitle = ref("Organizer List");
 const columns = ref([
