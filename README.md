@@ -113,7 +113,7 @@ The PM Training Management System is designed specifically for the Bangladesh Pl
 src/
 ├── components/           # Reusable Vue components
 │   ├── common/          # Shared components
-│   ├── ecommerce/       # Training dashboard components
+│   ├── training/       # Training dashboard components
 │   └── layout/          # Layout components
 ├── views/               # Page components
 ├── composables/         # Composition API utilities

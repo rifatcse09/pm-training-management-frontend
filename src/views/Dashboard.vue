@@ -15,9 +15,9 @@
 import { ref, onMounted } from "vue";
 import api from "@/composables/useApi";
 import AdminLayout from '../components/layout/AdminLayout.vue'
-import TrainingMetrics from '../components/ecommerce/TrainingMetrics.vue'
-import MonthlyTraining from '../components/ecommerce/MonthlyTraining.vue'
-import UpperGradeMonthlyTraining from '../components/ecommerce/UpperGradeMonthlyTraining.vue'
+import TrainingMetrics from '../components/training/TrainingMetrics.vue'
+import MonthlyTraining from '../components/training/MonthlyTraining.vue'
+import UpperGradeMonthlyTraining from '../components/training/UpperGradeMonthlyTraining.vue'
 
 const currentPageTitle = ref("Training Dashboard");
 const trainingStats = ref({});
