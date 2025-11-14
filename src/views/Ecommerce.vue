@@ -2,11 +2,8 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
-      <!-- Debug info -->
-      <!-- <div class="text-xs text-gray-500 mb-2">
-        Loading: {{ loading }}, Stats: {{ JSON.stringify(trainingStats) }}
-      </div> -->
       <EcommerceMetrics :stats="trainingStats" :loading="loading" />
+      <MonthlySale :chartData="monthlyChartData" :loading="chartLoading" />
     </div>
   </AdminLayout>
 </template>
@@ -16,10 +13,13 @@ import { ref, onMounted } from "vue";
 import api from "@/composables/useApi";
 import AdminLayout from '../components/layout/AdminLayout.vue'
 import EcommerceMetrics from '../components/ecommerce/EcommerceMetrics.vue'
+import MonthlySale from '../components/ecommerce/MonthlySale.vue'
 
 const currentPageTitle = ref("Training Dashboard");
 const trainingStats = ref({});
 const loading = ref(false);
+const monthlyChartData = ref({});
+const chartLoading = ref(false);
 
 const fetchTrainingStats = async () => {
   loading.value = true;
@@ -38,5 +38,24 @@ const fetchTrainingStats = async () => {
   }
 };
 
-onMounted(() => fetchTrainingStats());
+const fetchMonthlyChartData = async () => {
+  chartLoading.value = true;
+  try {
+    console.log('Fetching monthly chart data...');
+    const currentYear = new Date().getFullYear();
+    const response = await api.get(`/dashboard/monthly-chart?designation_type=ninth_grade&year=${currentYear}`);
+    console.log('Chart API Response:', response);
+    monthlyChartData.value = response.data || {};
+  } catch (error) {
+    console.error('Failed to fetch monthly chart data:', error);
+    monthlyChartData.value = {};
+  } finally {
+    chartLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchTrainingStats();
+  fetchMonthlyChartData();
+});
 </script>
