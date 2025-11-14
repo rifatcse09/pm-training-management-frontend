@@ -3,14 +3,14 @@
     class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6"
   >
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Up to 9th Grade - This Year {{ new Date().getFullYear() }} Month wise Total Employee Training</h3>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">10th Grade to Upper - This Year {{ new Date().getFullYear() }} Month wise Total Employee Training</h3>
     </div>
 
     <div class="max-w-full overflow-x-auto custom-scrollbar">
       <div v-if="loading" class="flex justify-center items-center h-64">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
       </div>
-      <div v-else id="chartOne" class="-ml-5 min-w-[650px] xl:min-w-full pl-2">
+      <div v-else id="chartTwo" class="-ml-5 min-w-[650px] xl:min-w-full pl-2">
         <VueApexCharts type="bar" height="350" :options="chartOptions" :series="series" />
       </div>
     </div>
@@ -45,7 +45,7 @@ const series = computed(() => {
 })
 
 const chartOptions = ref({
-  colors: ['#465fff'],
+  colors: ['#10b981'],
   chart: {
     fontFamily: 'Outfit, sans-serif',
     type: 'bar',
