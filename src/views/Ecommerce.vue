@@ -3,8 +3,10 @@
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div class="space-y-5 sm:space-y-6">
       <TrainingMetrics :stats="trainingStats" :loading="loading" />
-      <MonthlyTraining :chartData="monthlyChartData" :loading="chartLoading" />
-      <UpperGradeMonthlyTraining :chartData="upperGradeChartData" :loading="upperGradeChartLoading" />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+        <MonthlyTraining :chartData="monthlyChartData" :loading="chartLoading" />
+        <UpperGradeMonthlyTraining :chartData="upperGradeChartData" :loading="upperGradeChartLoading" />
+      </div>
     </div>
   </AdminLayout>
 </template>

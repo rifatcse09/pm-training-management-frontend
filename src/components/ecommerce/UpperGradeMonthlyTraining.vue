@@ -10,8 +10,8 @@
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
       </div>
-      <div v-else id="chartTwo" class="-ml-5 min-w-[650px] xl:min-w-full pl-2">
-        <VueApexCharts type="bar" height="350" :options="chartOptions" :series="series" />
+      <div v-else id="chartTwo" class="-ml-5 min-w-[400px] xl:min-w-full pl-2">
+        <VueApexCharts type="bar" height="300" :options="chartOptions" :series="series" />
       </div>
     </div>
   </div>
