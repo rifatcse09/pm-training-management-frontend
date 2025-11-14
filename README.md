@@ -1,220 +1,219 @@
-# TailAdmin Vue - Free Vue.js Tailwind CSS Admin Dashboard Template
+# PM Training Management Frontend
 
-TailAdmin Vue is a free, open-source admin dashboard template **built on Vue.js**, popular and progressive JavaScript
-framework, and **Tailwind CSS**. This **powerful combination** provides developers with an extensive library of
-essential components, elements, and pages to launch a comprehensive and data-centric back-end, dashboard, or admin panel
-solution for any Vue.js based web projects.
+A comprehensive training management system for the Bangladesh Planning Ministry, built with Vue.js 3, TypeScript, and Tailwind CSS. This frontend application provides a modern, responsive dashboard for managing employee training programs, assignments, and reports.
 
-![TailAdmin Vue.js Dashboard Preview](./banner.png)
+![PM Training Management Dashboard Preview](./banner.png)
 
-With TailAdmin Vue, you can leverage **Vue.js 3** features such as declarative rendering, component-based architecture,
-Vue Router for routing, and Pinia for state management. It also utilizes the power of Tailwind CSS for rapid UI
-development with its low-level utility classes and responsive design capabilities.
+## Project Overview
 
-## Overview
+The PM Training Management System is designed specifically for the Bangladesh Planning Ministry to efficiently manage employee training programs. The system enables administrators to track employee training assignments, generate comprehensive reports, and manage training resources with role-based access control.
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
+### Key Features
 
-- Vue 3 (Vite)
-- TypeScript
-- Tailwind CSS
+🏢 **Employee Management**
+- Add and manage employees with designation grades (1-29)
+- Track employee training history and progress
+- Support for multiple training assignments per employee
+- Grade-based categorization and filtering
 
-### Quick Links
+📚 **Training Program Management**
+- Comprehensive training catalog with local and foreign programs
+- Training organizer management and assignment
+- Group training session management with start/end dates
+- Training assignment tracking and monitoring
 
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+📊 **Advanced Reporting**
+- Grade-wise employee training reports
+- Monthly training statistics and analytics
+- Individual employee training history
+- Export functionality for training reports
 
-### Demos
+👥 **Role-Based Access Control**
+- **Admin**: Full system access with all permissions
+- **Officer**: View and manage training assignments
+- **Operator**: Create and update training records
+- Secure authentication with JWT tokens
 
-- [Free Version](https://free-vue-demo.tailadmin.com/)
-- [Pro Version](https://vue-demo.tailadmin.com)
+📈 **Dashboard & Analytics**
+- Real-time training statistics
+- Monthly training charts by grade levels
+- Visual representation of training data
+- Responsive design for all devices
 
-### Other Versions
+## Technology Stack
 
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
+### Frontend
+- **Vue.js 3** - Progressive JavaScript framework with Composition API
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Vite** - Fast build tool and development server
+- **Vue Router 4** - Client-side routing
+- **Pinia** - State management
+- **ApexCharts** - Data visualization and charting
+- **Axios** - HTTP client for API communication
 
-## Installation
+### Backend Integration
+- RESTful API integration with Laravel backend
+- JWT-based authentication
+- Real-time data synchronization
+- File upload and management
+
+## Quick Links
+
+- [🔗 GitHub Repository](https://github.com/rifatcse09/pm-training-management-frontend)
+- [📄 API Documentation](https://api.pm-training.gov.bd/docs)
+- [🖌️ Design System](https://tailwindcss.com/)
+
+## Installation & Setup
 
 ### Prerequisites
 
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
+- Node.js 18.x or later (recommended Node.js 20.x)
+- npm or yarn package manager
+- Access to the PM Training Management backend API
 
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
-- Recommended IDE Setup: [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+### Installation Steps
 
-#### Type Support for `.vue` Imports in TS
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/rifatcse09/pm-training-management-frontend.git
+   cd pm-training-management-frontend
+   ```
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-### Cloning the Repository
-
-Clone the repository using the following command:
-
-```bash
-git clone https://github.com/TailAdmin/vue-tailwind-admin-dashboard.git
-```
-
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
-
-1. Install dependencies:
-
+2. **Install dependencies:**
    ```bash
    npm install
    # or
    yarn install
    ```
 
-2. Start the development server:
+3. **Environment Configuration:**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Update the `.env.local` file with your API endpoints and configuration.
 
+4. **Start development server:**
    ```bash
    npm run dev
    # or
    yarn dev
    ```
 
-3. Production build:
+5. **Build for production:**
    ```bash
    npm run build
    # or
    yarn build
    ```
 
-## Feature Comparison
+## Project Structure
 
-### Free Version
+```
+src/
+├── components/           # Reusable Vue components
+│   ├── common/          # Shared components
+│   ├── ecommerce/       # Training dashboard components
+│   └── layout/          # Layout components
+├── views/               # Page components
+├── composables/         # Composition API utilities
+├── assets/              # Static assets
+├── types/               # TypeScript type definitions
+└── router/              # Vue Router configuration
+```
 
-- 1 Unique Dashboard
-- 30+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+## Core Features
 
-### Pro Version
+### Employee Management
+- **Add Employee**: Register new employees with personal information and designation
+- **Grade Classification**: Automatic categorization based on designation (Grade 1-29 vs Upper Grades)
+- **Training History**: Track all training assignments and completions
+- **Search & Filter**: Find employees by various criteria
 
-- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
-- 400+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+### Training Management
+- **Training Catalog**: Maintain comprehensive list of available training programs
+- **Organizer Management**: Manage training organizers and institutions
+- **Group Training**: Create training sessions with multiple employee assignments
+- **Assignment Tracking**: Monitor training progress and completion status
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+### Reporting System
+- **Grade-wise Reports**: Generate reports based on employee grades
+- **Individual Reports**: Detailed training history for specific employees
+- **Monthly Analytics**: Visual charts showing training trends
+- **Export Options**: Download reports in PDF format
 
-## Components
+### Dashboard Analytics
+- **Training Statistics**: Real-time overview of training metrics
+- **Monthly Charts**: Visual representation of training data
+- **Grade-based Analytics**: Separate charts for different grade levels
+- **Progress Tracking**: Monitor training completion rates
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using Vue.js and Tailwind CSS. The template includes:
+## User Roles & Permissions
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- Can't forget Dark Mode 🕶️
+### Admin
+- Full system access
+- User management
+- System configuration
+- All CRUD operations
 
-All components are built with Vue and styled using Tailwind CSS for easy customization.
+### Officer
+- View training data
+- Generate reports
+- Monitor training progress
+- Read-only access to sensitive data
 
-## Features
+### Operator
+- Create and update training records
+- Assign employees to training
+- Manage training sessions
+- Limited administrative access
 
-**💎 High-quality, Premium Modern Design:**
-A thoughtfully designed dashboard template with a deep focus on UX/UI, already trusted and utilized by over 10K+ web apps worldwide.
+## API Integration
 
-**✨ Vue 3:**
-Get enhanced performance with the latest Vue version.
+The frontend integrates with a Laravel-based backend API that provides:
 
-**⚡ Vite Build System:**
-Enjoy quick development with Vite, ensuring fast code compilation.
+- **Authentication**: JWT-based secure login
+- **Employee API**: CRUD operations for employee management
+- **Training API**: Training program and assignment management
+- **Reporting API**: Generate and export training reports
+- **Dashboard API**: Real-time statistics and analytics
 
-**🔀 Vue Router:**
-Manage app navigation with ease using Vue Router for seamless transitions.
+## Development Guidelines
 
-**💡 Reactive Utilities:**
-Enhance component reactivity with @vueuse/core utilities.
+### Code Standards
+- TypeScript for type safety
+- Vue 3 Composition API
+- ESLint and Prettier for code formatting
+- Component-based architecture
 
-**📊 Charting with ApexCharts:**
-Visualize data with ApexCharts for beautiful analytics.
+### State Management
+- Pinia for centralized state management
+- Reactive data handling
+- Persistent authentication state
 
-**🗺️ Vector Maps with JSVectorMap:**
-Easily integrate interactive vector maps with JSVectorMap.
+### Styling
+- Tailwind CSS utility classes
+- Responsive design principles
+- Dark mode support
+- Consistent design system
 
-**🖌️ UI with Tailwind CSS:**
-Frontend UI built on the powerful and versatile Tailwind CSS framework.
+## Contributing
 
-**💫 TypeScript Support:**
-Write safer, maintainable code with TailAdmin Vue's TypeScript Support.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-**✅ Linting and Formatting:**
-Maintain a clean codebase with built-in linting and formatting.
+## License
 
-**🗃️ State Management with Pinia:**
-Handle your app's state with Pinia for clean, organized code.
+This project is proprietary software developed for the Bangladesh Planning Ministry. All rights reserved.
 
-## Update Logs
+## Support
 
-### Version 2.0.1 - [February 27, 2025]
+For technical support or inquiries, please contact:
+- **Development Team**: hello@mdrifatul.info
 
-#### Update Overview
+---
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
-
-#### Next Steps
-
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
-
-### Version 2.0.0 - [February 2025]
-
-Major update with Vue 3 migration and comprehensive redesign.
-
-#### Major Improvements
-
-- Complete migration to Vue 3 Composition API
-- Updated to Vue Router 4
-- Enhanced user interface with new Vue 3 components
-- Improved performance with Vue 3's virtual DOM
-- Better accessibility and responsive design
-
-#### New Features
-
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Collapsible sidebar with Vue 3 integration
-- Enhanced navigation with Vue Router 4
-- Real-time chat functionality
-- Full-featured calendar with drag-and-drop
-- Advanced table components
-- Updated data visualization with ApexCharts
-
-#### Breaking Changes
-
-- Requires Vue 3 and Vue Router 4
-- Chart components migrated to ApexCharts for Vue 3
-- Modified routing implementation
-- Updated component APIs for Vue 3 compatibility
-
-[Read more](https://tailadmin.com/docs/update-logs/vue) on this release.
-
-### Version 1.0.2 - [June 19, 2024]
-
-#### Issues
-
-- Fix Mobile Menu Hamburger Icon issue.
-
-### Version 1.0.1 - [Feb 08, 2024]
-
-#### Enhancements
-
-- Make it functional [Multiselect Dropdown/Form Elements].
-- Delete SelectGroup Components then create a SelectGroup folder and create two files under this
-  folder SelectGroupOne.vue SelectGroupTwo.vue [Select Group/Form Elements & Layout].
-- Update style.css file.
-
-### Version 1.0.0 - Initial Release - [Jan 22, 2024]
-
-- Initial release of TailAdmin Vue.
+**© 2025 Bangladesh Planning Ministry - Training Management System**
