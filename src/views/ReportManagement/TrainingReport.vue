@@ -32,6 +32,7 @@
                   :reduce="training => training.value"
                   :fetchMore="loadMoreTrainings"
                   :loading="trainingLoading"
+                  :canLoadMore="canLoadMoreTrainings"
                   @search="handleTrainingSearch"
                   placeholder="Search and select training..."
                 />
@@ -58,6 +59,7 @@
                   :reduce="employee => employee.value"
                   :fetchMore="loadMoreEmployees"
                   :loading="employeeLoading"
+                  :canLoadMore="canLoadMoreEmployees"
                   @search="handleEmployeeSearch"
                   placeholder="Search and select employee..."
                 />
@@ -92,12 +94,31 @@
             <div class="mt-6 flex justify-start">
               <button
                 type="submit"
-                :disabled="loading"
-                class="px-6 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 text-left"
+                :disabled="loading || !isFormValid"
+                class="px-6 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 text-left"
+                :class="{
+                  'bg-blue-500 hover:bg-blue-600': !loading && isFormValid,
+                  'bg-gray-400 cursor-not-allowed': loading || !isFormValid
+                }"
               >
                 <span v-if="!loading">Run Report</span>
                 <span v-else>Loading...</span>
               </button>
+            </div>
+
+            <!-- Validation Messages -->
+            <div v-if="validationErrors.length > 0" class="mt-4">
+              <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div class="text-red-800 text-sm font-medium mb-1">Please fix the following errors:</div>
+                <ul class="text-red-700 text-sm space-y-1">
+                  <li v-for="error in validationErrors" :key="error" class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    {{ error }}
+                  </li>
+                </ul>
+              </div>
             </div>
           </form>
         </ComponentCard>
@@ -115,8 +136,16 @@ import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
 import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
-import debounce from "lodash.debounce";
 import api from '@/composables/useApi'
+
+// Remove lodash.debounce import and create custom debounce function
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+};
 
 const currentPageTitle = ref("Training Report");
 const filters = ref({
@@ -125,22 +154,22 @@ const filters = ref({
   startDate: "",
   endDate: "",
   employee_id: null,
-  training_id: null, // Add training_id to filters
+  training_id: null,
 });
 
 const subjects = ref([
   { id: 1, name: "৯ম-তদুর্ধ্ব গ্রেডের সকল কর্মকর্তার প্রশিক্ষনের প্রতিবেদন" },
   { id: 2, name: "৯ম-তদুর্ধ্ব গ্রেডের একক কর্মকর্তার প্রশিক্ষনের প্রতিবেদন" },
-  { id: 3, name: "৯ম-তদুর্ধ্ব গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
+  { id: 3, name: "৯ম-তদুর্ধ্ব গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
   { id: 4, name: "১০ম গ্রেডের সকল কর্মকর্তার প্রশিক্ষনের প্রতিবেদন" },
   { id: 5, name: "১০ম গ্রেডের একক কর্মকর্তার প্রশিক্ষনের প্রতিবেদন" },
-  { id: 6, name: "১০ম গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
+  { id: 6, name: "১০ম গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
   { id: 7, name: "১১-১৬তম গ্রেডের সকল কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
   { id: 8, name: "১১-১৬তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
-  { id: 9, name: "১১-১৬তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
+  { id: 9, name: "১১-১৬তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
   { id: 10, name: "১৭-২০তম গ্রেডের সকল কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
   { id: 11, name: "১৭-২০তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
-  { id: 12, name: "১৭-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
+  { id: 12, name: "১৭-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
   { id: 13, name: "প্রকল্প অনুসারে মোট প্রশিক্ষনের প্রতিবেদন" }
 ]);
 
@@ -148,7 +177,7 @@ const subjects = ref([
 const generateFiscalYears = () => {
   const currentYear = new Date().getFullYear();
   const years = [];
-  for (let i = 10; i >= 0; i--) {
+  for (let i = 3; i >= 0; i--) {
     const startYear = currentYear - i;
     const endYear = startYear + 1;
     years.push({ value: `${startYear}-${endYear}`, label: `${startYear}-${endYear}` });
@@ -174,13 +203,24 @@ const flatpickrConfig = {
 
 const loading = ref(false);
 const employeeLoading = ref(false);
-const trainingLoading = ref(false); // Add training loading state
+const trainingLoading = ref(false);
 
 // Training-related reactive variables
 const trainings = ref([]);
 const filteredTrainings = ref([]);
 const trainingSearchQuery = ref("");
 const trainingPagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0,
+});
+
+// Employee-related reactive variables
+const employees = ref([]);
+const filteredEmployees = ref([]);
+const employeeSearchQuery = ref("");
+const pagination = ref({
   current_page: 1,
   last_page: 1,
   per_page: 10,
@@ -194,10 +234,176 @@ const showEmployeeDropdown = computed(() => {
 
 // Computed property to show training dropdown conditionally
 const showTrainingDropdown = computed(() => {
-  return [3, 6, 9, 12].includes(filters.value.subject);
+  return [3, 6, 9, 11].includes(filters.value.subject);
 });
 
-// Training fetching functions
+// Computed properties for canLoadMore
+const canLoadMoreEmployees = computed(() => {
+  return pagination.value.current_page < pagination.value.last_page;
+});
+
+const canLoadMoreTrainings = computed(() => {
+  return trainingPagination.value.current_page < trainingPagination.value.last_page;
+});
+
+// Map subject IDs to grade queries
+const getGradeQueryBySubjectId = (subjectId) => {
+  const gradeMapping = {
+    1: "grade-9",
+    2: "grade-9",
+    3: "grade-9",
+    4: "grade-10",
+    5: "grade-10",
+    6: "grade-10",
+    7: "grade-11-16",
+    8: "grade-11-16",
+    9: "grade-11-16",
+    10: "grade-17-20",
+    11: "grade-17-20",
+    12: "grade-17-20"
+  };
+
+  return gradeMapping[subjectId] || "";
+};
+
+// Employee functions with fixes
+const fetchEmployees = async (query = "", page = 1, append = false) => {
+  if (employeeLoading.value && append) {
+    console.log("Already loading, skipping request");
+    return;
+  }
+
+  employeeLoading.value = true;
+  console.log(`Fetching employees - Query: "${query}", Page: ${page}, Append: ${append}`);
+
+  try {
+    const response = await api.get("/employees", {
+      params: {
+        search: query,
+        page,
+        per_page: pagination.value.per_page
+      }
+    });
+
+    console.log("API Response:", response.data);
+    const data = response.data;
+
+    const newEmployees = data.data.map((employee) => ({
+      value: employee.id,
+      label: `${employee.name} (Grade: ${employee.grade || employee.designation_name || 'N/A'})`,
+      name: employee.name,
+      grade: employee.grade,
+      designation: employee.designation_name,
+    }));
+
+    if (append) {
+      employees.value = [...employees.value, ...newEmployees];
+      console.log(`Appended ${newEmployees.length} employees`);
+    } else {
+      employees.value = newEmployees;
+      console.log(`Loaded ${newEmployees.length} employees`);
+    }
+
+    // Update pagination
+    const paginationData = data.meta || data;
+    pagination.value = {
+      current_page: paginationData.current_page || page,
+      last_page: paginationData.last_page || 1,
+      per_page: paginationData.per_page || pagination.value.per_page,
+      total: paginationData.total || 0,
+    };
+
+    filteredEmployees.value = employees.value;
+    console.log("Updated pagination:", pagination.value);
+
+  } catch (error) {
+    console.error("Failed to fetch employees:", error.response?.data || error.message);
+    if (!append) {
+      employees.value = [];
+      filteredEmployees.value = [];
+    }
+  } finally {
+    employeeLoading.value = false;
+  }
+};
+
+// Create debounced function properly
+const debouncedFetchEmployees = debounce(async (query, gradeQuery) => {
+  console.log(`Debounced search triggered - Query: "${query}", Grade: "${gradeQuery}"`);
+
+  // Determine final query
+  let finalQuery = query.trim();
+  if (!finalQuery && gradeQuery) {
+    finalQuery = gradeQuery;
+  }
+
+  // Reset pagination for new search
+  pagination.value.current_page = 1;
+  await fetchEmployees(finalQuery, 1, false);
+}, 500);
+
+const handleEmployeeSearch = (query) => {
+  console.log(`Employee search handler called with: "${query}"`);
+  employeeSearchQuery.value = query;
+
+  // Get grade-based query from selected subject
+  const gradeQuery = getGradeQueryBySubjectId(filters.value.subject);
+
+  console.log(`Grade query: "${gradeQuery}"`);
+
+  if (!query.trim() && !gradeQuery) {
+    // If no query and no grade filter, load initial employees
+    pagination.value.current_page = 1;
+    fetchEmployees("", 1, false);
+  } else {
+    // Use debounced search
+    debouncedFetchEmployees(query, gradeQuery);
+  }
+};
+
+const loadMoreEmployees = async () => {
+  console.log("=== loadMoreEmployees called ===");
+  console.log("Employee loading state:", employeeLoading.value);
+  console.log("Current page:", pagination.value.current_page);
+  console.log("Last page:", pagination.value.last_page);
+  console.log("Can load more:", canLoadMoreEmployees.value);
+  console.log("Current employees count:", employees.value.length);
+  console.log("Total employees:", pagination.value.total);
+
+  // Prevent loading if already loading or no more pages
+  if (employeeLoading.value) {
+    console.log("Already loading, aborting");
+    return Promise.resolve();
+  }
+
+  if (!canLoadMoreEmployees.value) {
+    console.log("No more pages to load");
+    return Promise.resolve();
+  }
+
+  const nextPage = pagination.value.current_page + 1;
+  console.log("Loading page:", nextPage);
+
+  // Determine current query for pagination
+  const gradeQuery = getGradeQueryBySubjectId(filters.value.subject);
+  let currentQuery = employeeSearchQuery.value.trim();
+
+  if (!currentQuery && gradeQuery) {
+    currentQuery = gradeQuery;
+  }
+
+  console.log("Using query for load more:", currentQuery);
+
+  try {
+    await fetchEmployees(currentQuery, nextPage, true);
+    console.log("Successfully loaded more employees");
+    console.log("New employee count:", employees.value.length);
+  } catch (error) {
+    console.error("Error in loadMoreEmployees:", error);
+  }
+};
+
+// Training functions
 const fetchTrainings = async (query = "", page = 1, append = false) => {
   if (trainingLoading.value && append) return;
 
@@ -243,10 +449,10 @@ const fetchTrainings = async (query = "", page = 1, append = false) => {
   }
 };
 
-const debouncedFetchTrainings = debounce((query) => {
+const debouncedFetchTrainings = debounce(async (query) => {
   trainingPagination.value.current_page = 1;
-  fetchTrainings(query, 1, false);
-}, 300);
+  await fetchTrainings(query, 1, false);
+}, 500);
 
 const handleTrainingSearch = (query) => {
   trainingSearchQuery.value = query;
@@ -259,270 +465,177 @@ const handleTrainingSearch = (query) => {
 };
 
 const loadMoreTrainings = async () => {
-  if (trainingLoading.value) return;
-  if (trainingPagination.value.current_page >= trainingPagination.value.last_page) return;
+  console.log("=== loadMoreTrainings called ===");
+  console.log("Training loading state:", trainingLoading.value);
+  console.log("Current page:", trainingPagination.value.current_page);
+  console.log("Last page:", trainingPagination.value.last_page);
+  console.log("Can load more:", canLoadMoreTrainings.value);
+
+  if (trainingLoading.value) {
+    console.log("Already loading, aborting");
+    return Promise.resolve();
+  }
+
+  if (!canLoadMoreTrainings.value) {
+    console.log("No more pages to load");
+    return Promise.resolve();
+  }
 
   const nextPage = trainingPagination.value.current_page + 1;
-  await fetchTrainings(trainingSearchQuery.value, nextPage, true);
+  console.log("Loading page:", nextPage);
+
+  try {
+    await fetchTrainings(trainingSearchQuery.value, nextPage, true);
+    console.log("Successfully loaded more trainings");
+  } catch (error) {
+    console.error("Error in loadMoreTrainings:", error);
+  }
 };
 
+// Generate report function
 const generateReport = async () => {
-  loading.value = true;
+  // Additional validation before submission
+  if (!isFormValid.value) {
+    alert('Please complete all required fields before generating the report.')
+    return
+  }
+
+  loading.value = true
   try {
     const params = {
       subject: filters.value.subject,
       fiscal_years: [...new Set(filters.value.fiscalYears.map(fy => fy.value))],
       start_date: filters.value.startDate,
       end_date: filters.value.endDate,
-      employee_id: filters.value.employee_id,
-    };
-
-    // Include training_id only for subjects 3, 6, 9, and 12
-    if ([3, 6, 9, 12].includes(filters.value.subject) && filters.value.training_id) {
-      params.training_id = filters.value.training_id;
     }
+
+    // Include employee_id only for subjects 2, 5, 8, 11
+    if (showEmployeeDropdown.value && filters.value.employee_id) {
+      params.employee_id = filters.value.employee_id
+    }
+
+    // Include training_id only for subjects 3, 6, 9, 11
+    if (showTrainingDropdown.value && filters.value.training_id) {
+      params.training_id = filters.value.training_id
+    }
+
+    console.log('Generating report with params:', params)
 
     const response = await api.get('/training-reports', {
       params,
       headers: { 'Accept': 'application/pdf' },
       responseType: 'blob',
-    });
+    })
 
-    // Extract filename from Content-Disposition header
-    const contentDisposition = response.headers['content-disposition'];
-    const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-    const filename = filenameMatch ? filenameMatch[1] : 'training_report.pdf';
+    // Extract filename and download
+    const contentDisposition = response.headers['content-disposition']
+    const filenameMatch = contentDisposition?.match(/filename="(.+)"/)
+    const filename = filenameMatch ? filenameMatch[1] : 'training_report.pdf'
 
-    // Create a Blob from the response and download the file
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename); // Use the extracted filename
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   } catch (err) {
-    const errorMessage = err.response?.data?.message || "Failed to generate report.";
-    alert(`${errorMessage}`);
+    const errorMessage = err.response?.data?.message || "Failed to generate report."
+    alert(`${errorMessage}`)
+    console.error('Report generation error:', err)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
-const employees = ref([]);
-const filteredEmployees = ref([]);
-const employeeSearchQuery = ref("");
-const pagination = ref({
-  current_page: 1,
-  last_page: 1,
-  per_page: 10,
-  total: 0,
-});
-
-const fetchEmployees = async (query = "", page = 1, append = false) => {
-  // Prevent duplicate requests
-  if (employeeLoading.value && append) {
-    console.log("Already loading, skipping request");
-    return;
-  }
-
-  employeeLoading.value = true;
-  console.log(`Fetching employees - Query: "${query}", Page: ${page}, Append: ${append}`);
-
-  try {
-    const response = await api.get("/employees", {
-      params: {
-        search: query,
-        page,
-        per_page: pagination.value.per_page
-      }
-    });
-
-    console.log("API Response:", response.data);
-    const data = response.data;
-
-    const newEmployees = data.data.map((employee) => ({
-      value: employee.id,
-      label: `${employee.name} (Grade: ${employee.grade || employee.designation_name || 'N/A'})`,
-      name: employee.name,
-      grade: employee.grade,
-      designation: employee.designation_name,
-    }));
-
-    if (append) {
-      // Append for pagination
-      employees.value = [...employees.value, ...newEmployees];
-      console.log(`Appended ${newEmployees.length} employees`);
-    } else {
-      // Replace for new search
-      employees.value = newEmployees;
-      console.log(`Loaded ${newEmployees.length} employees`);
-    }
-
-    // Update pagination from response - handle both data structure formats
-    const paginationData = data.meta || data;
-    pagination.value = {
-      current_page: paginationData.current_page || page,
-      last_page: paginationData.last_page || 1,
-      per_page: paginationData.per_page || pagination.value.per_page,
-      total: paginationData.total || 0,
-    };
-
-    filteredEmployees.value = employees.value;
-    console.log("Updated pagination:", pagination.value);
-    console.log("Total employees loaded:", employees.value.length);
-
-  } catch (error) {
-    console.error("Failed to fetch employees:", error.response?.data || error.message);
-    if (!append) {
-      employees.value = [];
-      filteredEmployees.value = [];
-    }
-  } finally {
-    employeeLoading.value = false;
-  }
-};
-
-// Map subject IDs to grade queries
-const getGradeQueryBySubjectId = (subjectId) => {
-  const gradeMapping = {
-    1: "grade-9",
-    2: "grade-9",
-    3: "grade-9",      // ৯ম-তদুর্ধ্ব গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন
-    4: "grade-10",
-    5: "grade-10",
-    6: "grade-10",     // ১০ম গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন
-    7: "grade-11-16",
-    8: "grade-11-16",
-    9: "grade-11-16",  // ১১-১৬তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন
-    10: "grade-17-20",
-    11: "grade-17-20",
-    12: "grade-17-20"  // ১৭-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন
-  };
-
-  return gradeMapping[subjectId] || "";
-};
-
-const debouncedFetchEmployees = debounce((query) => {
-  // Reset pagination for new search
-  pagination.value.current_page = 1;
-  fetchEmployees(query, 1, false);
-}, 300);
-
-const handleEmployeeSearch = (query) => {
-  employeeSearchQuery.value = query;
-
-  // Get grade-based query from selected subject
-  const gradeQuery = getGradeQueryBySubjectId(filters.value.subject);
-
-  // Combine user search with grade filter
-  let finalQuery = query.trim();
-  if (gradeQuery && finalQuery) {
-    // If both grade filter and user search exist, prioritize user search
-    finalQuery = query.trim();
-  } else if (gradeQuery) {
-    // If only grade filter exists, use it
-    finalQuery = gradeQuery;
-  }
-
-  console.log(`Employee search - User query: "${query}", Grade query: "${gradeQuery}", Final query: "${finalQuery}"`);
-
-  if (finalQuery === "") {
-    // If no query, load initial employees
-    pagination.value.current_page = 1;
-    fetchEmployees("", 1, false);
-  } else {
-    // Use debounced search
-    debouncedFetchEmployees(finalQuery);
-  }
-};
-
-const loadMoreEmployees = async () => {
-  console.log("=== loadMoreEmployees called ===");
-  console.log("Current page:", pagination.value.current_page);
-  console.log("Last page:", pagination.value.last_page);
-  console.log("Employee loading:", employeeLoading.value);
-  console.log("Current employees count:", employees.value.length);
-
-  if (employeeLoading.value) {
-    console.log("Already loading, aborting");
-    return;
-  }
-
-  if (pagination.value.current_page >= pagination.value.last_page) {
-    console.log("No more pages to load");
-    return;
-  }
-
-  const nextPage = pagination.value.current_page + 1;
-  console.log("Loading page:", nextPage);
-
-  // Get current query for pagination
-  const gradeQuery = getGradeQueryBySubjectId(filters.value.subject);
-  let currentQuery = employeeSearchQuery.value.trim();
-
-  if (gradeQuery && !currentQuery) {
-    currentQuery = gradeQuery;
-  }
-
-  try {
-    await fetchEmployees(currentQuery, nextPage, true);
-    console.log("Successfully loaded more employees");
-  } catch (error) {
-    console.error("Error in loadMoreEmployees:", error);
-  }
-};
-
-// Watch for subject changes and update employee list accordingly
+// Watch for subject changes
 watch(
   () => filters.value.subject,
   (newSubjectId) => {
-    console.log(`Subject changed to: ${newSubjectId}`);
+    console.log(`Subject changed to: ${newSubjectId}`)
+    console.log(`Show employee dropdown: ${showEmployeeDropdown.value}`)
+    console.log(`Show training dropdown: ${showTrainingDropdown.value}`)
+    
+    // Reset selections
+    filters.value.employee_id = null
+    filters.value.training_id = null
 
-    // Reset employee selection when subject changes
-    filters.value.employee_id = null;
-
-    // Reset training selection when subject changes
-    filters.value.training_id = null;
-
-    // Fetch trainings if training dropdown should be shown
+    // Handle training dropdown
     if (showTrainingDropdown.value) {
-      trainingPagination.value.current_page = 1;
-      trainingSearchQuery.value = "";
-      fetchTrainings("", 1, false);
+      console.log('Loading trainings for subject:', newSubjectId)
+      trainingPagination.value.current_page = 1
+      trainingSearchQuery.value = ""
+      fetchTrainings("", 1, false)
     }
 
-    // Only fetch employees if employee dropdown should be shown
+    // Handle employee dropdown
     if (showEmployeeDropdown.value) {
-      // Get grade query for the new subject
-      const gradeQuery = getGradeQueryBySubjectId(newSubjectId);
+      const gradeQuery = getGradeQueryBySubjectId(newSubjectId)
+      console.log(`Loading employees for subject ${newSubjectId} with grade query: "${gradeQuery}"`)
 
+      // Reset state
+      pagination.value.current_page = 1
+      employeeSearchQuery.value = ""
+
+      // Fetch employees with grade filter
       if (gradeQuery) {
-        console.log(`Loading employees for grade: ${gradeQuery}`);
-        // Reset pagination and search query
-        pagination.value.current_page = 1;
-        employeeSearchQuery.value = "";
-
-        // Fetch employees with grade filter
-        fetchEmployees(gradeQuery, 1, false);
+        fetchEmployees(gradeQuery, 1, false)
       } else {
-        console.log("No grade filter for this subject, loading all employees");
-        // Reset pagination and search query
-        pagination.value.current_page = 1;
-        employeeSearchQuery.value = "";
-
-        // Fetch all employees
-        fetchEmployees("", 1, false);
+        fetchEmployees("", 1, false)
       }
     }
-  }
-);
+  },
+  { immediate: true }
+)
 
-onMounted(() => {
-  fetchEmployees();
-  // Fetch trainings on mount if needed
-  if (showTrainingDropdown.value) {
-    fetchTrainings();
+// Also add better debugging for the computed properties
+watch(showEmployeeDropdown, (newValue) => {
+  console.log('showEmployeeDropdown changed to:', newValue)
+  console.log('Current subject:', filters.value.subject)
+})
+
+watch(showTrainingDropdown, (newValue) => {
+  console.log('showTrainingDropdown changed to:', newValue)
+  console.log('Current subject:', filters.value.subject)
+})
+
+// Add form validation computed properties and methods
+const validationErrors = computed(() => {
+  const errors = []
+  
+  // Subject is required
+  if (!filters.value.subject) {
+    errors.push('Subject selection is required')
   }
-});
+  
+  // Employee is required for subjects 2, 5, 8, 11
+  if (showEmployeeDropdown.value && !filters.value.employee_id) {
+    errors.push('Employee selection is required for this report type')
+  }
+  
+  // Training is required for subjects 3, 6, 9, 11
+  if (showTrainingDropdown.value && !filters.value.training_id) {
+    errors.push('Training selection is required for this report type')
+  }
+  
+  return errors
+})
+
+const isFormValid = computed(() => {
+  // Basic validation
+  if (!filters.value.subject) return false
+  
+  // Employee validation for specific subjects
+  if (showEmployeeDropdown.value && !filters.value.employee_id) {
+    return false
+  }
+  
+  // Training validation for specific subjects
+  if (showTrainingDropdown.value && !filters.value.training_id) {
+    return false
+  }
+  
+  return true
+})
 </script>
