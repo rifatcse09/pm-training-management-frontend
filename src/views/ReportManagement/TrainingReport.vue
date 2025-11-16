@@ -137,6 +137,7 @@ import ComponentCard from "@/components/common/ComponentCard.vue";
 import MultipleSelect from "@/components/forms/FormElements/MultipleSelect.vue";
 import CustomDropdown from "@/components/forms/FormElements/CustomDropdown.vue";
 import api from '@/composables/useApi'
+import { SubjectGradeHelper, ReportTypeCategory } from '@/enums/SubjectGradeMapping'
 
 // Remove lodash.debounce import and create custom debounce function
 const debounce = (func, delay) => {
@@ -164,12 +165,12 @@ const subjects = ref([
   { id: 4, name: "১০ম গ্রেডের সকল কর্মকর্তার প্রশিক্ষনের প্রতিবেদন" },
   { id: 5, name: "১০ম গ্রেডের একক কর্মকর্তার প্রশিক্ষনের প্রতিবেদন" },
   { id: 6, name: "১০ম গ্রেডের সকল কর্মকর্তার একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
-  { id: 7, name: "১১-১৬তম গ্রেডের সকল কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
-  { id: 8, name: "১১-১৬তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
-  { id: 9, name: "১১-১৬তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
-  { id: 10, name: "১৭-২০তম গ্রেডের সকল কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
-  { id: 11, name: "১৭-২০তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
-  { id: 12, name: "১৭-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
+  { id: 7, name: "১১-১৮তম গ্রেডের সকল কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
+  { id: 8, name: "১১-১৮তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
+  { id: 9, name: "১১-১৮তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
+  { id: 10, name: "১৯-২০তম গ্রেডের সকল কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
+  { id: 11, name: "১৯-২০তম গ্রেডের একক কর্মচারীর প্রশিক্ষনের প্রতিবেদন" },
+  { id: 12, name: "১৯-২০তম গ্রেডের সকল কর্মচারীর একক বিষয় ভিত্তিক প্রশিক্ষনের প্রতিবেদন" },
   { id: 13, name: "প্রকল্প অনুসারে মোট প্রশিক্ষনের প্রতিবেদন" }
 ]);
 
@@ -229,12 +230,12 @@ const pagination = ref({
 
 // Computed property to show employee dropdown conditionally
 const showEmployeeDropdown = computed(() => {
-  return [2, 5, 8, 11].includes(filters.value.subject);
+  return SubjectGradeHelper.requiresEmployee(filters.value.subject);
 });
 
 // Computed property to show training dropdown conditionally
 const showTrainingDropdown = computed(() => {
-  return [3, 6, 9, 11].includes(filters.value.subject);
+  return SubjectGradeHelper.requiresTraining(filters.value.subject);
 });
 
 // Computed properties for canLoadMore
@@ -246,24 +247,9 @@ const canLoadMoreTrainings = computed(() => {
   return trainingPagination.value.current_page < trainingPagination.value.last_page;
 });
 
-// Map subject IDs to grade queries
+// Map subject IDs to grade queries using enum
 const getGradeQueryBySubjectId = (subjectId) => {
-  const gradeMapping = {
-    1: "grade-9",
-    2: "grade-9",
-    3: "grade-9",
-    4: "grade-10",
-    5: "grade-10",
-    6: "grade-10",
-    7: "grade-11-16",
-    8: "grade-11-16",
-    9: "grade-11-16",
-    10: "grade-17-20",
-    11: "grade-17-20",
-    12: "grade-17-20"
-  };
-
-  return gradeMapping[subjectId] || "";
+  return SubjectGradeHelper.getGradeCategory(subjectId) || "";
 };
 
 // Employee functions with fixes
@@ -556,7 +542,7 @@ watch(
     console.log(`Subject changed to: ${newSubjectId}`)
     console.log(`Show employee dropdown: ${showEmployeeDropdown.value}`)
     console.log(`Show training dropdown: ${showTrainingDropdown.value}`)
-    
+
     // Reset selections
     filters.value.employee_id = null
     filters.value.training_id = null
@@ -603,39 +589,39 @@ watch(showTrainingDropdown, (newValue) => {
 // Add form validation computed properties and methods
 const validationErrors = computed(() => {
   const errors = []
-  
+
   // Subject is required
   if (!filters.value.subject) {
     errors.push('Subject selection is required')
   }
-  
-  // Employee is required for subjects 2, 5, 8, 11
-  if (showEmployeeDropdown.value && !filters.value.employee_id) {
+
+  // Employee is required for specific subjects
+  if (SubjectGradeHelper.requiresEmployee(filters.value.subject) && !filters.value.employee_id) {
     errors.push('Employee selection is required for this report type')
   }
-  
-  // Training is required for subjects 3, 6, 9, 11
-  if (showTrainingDropdown.value && !filters.value.training_id) {
+
+  // Training is required for specific subjects
+  if (SubjectGradeHelper.requiresTraining(filters.value.subject) && !filters.value.training_id) {
     errors.push('Training selection is required for this report type')
   }
-  
+
   return errors
 })
 
 const isFormValid = computed(() => {
   // Basic validation
   if (!filters.value.subject) return false
-  
+
   // Employee validation for specific subjects
-  if (showEmployeeDropdown.value && !filters.value.employee_id) {
+  if (SubjectGradeHelper.requiresEmployee(filters.value.subject) && !filters.value.employee_id) {
     return false
   }
-  
+
   // Training validation for specific subjects
-  if (showTrainingDropdown.value && !filters.value.training_id) {
+  if (SubjectGradeHelper.requiresTraining(filters.value.subject) && !filters.value.training_id) {
     return false
   }
-  
+
   return true
 })
 </script>
